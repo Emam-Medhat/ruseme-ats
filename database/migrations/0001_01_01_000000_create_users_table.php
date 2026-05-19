@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('subscription_tier', ['free', 'pro', 'elite'])->default('free');
+            $table->integer('credits')->default(1);
             $table->rememberToken();
             $table->timestamps();
         });

@@ -15,11 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Delete the admin user if it already exists to avoid duplicates
+        User::where('email', 'admin@resume.com')->delete();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@resume.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'subscription_tier' => 'elite',
+            'credits' => 100,
         ]);
     }
 }

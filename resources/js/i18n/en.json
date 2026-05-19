@@ -1,0 +1,29 @@
+{
+  "brand": "CV Genius AI",
+  "tagline": "ATS-grade resume intelligence powered by AI",
+  "nav": {
+    "dashboard": "Dashboard",
+    "upload": "Upload",
+    "pricing": "Pricing",
+    "history": "History",
+    "login": "Log in",
+    "register": "Get started free"
+  },
+  "hero": {
+    "title": "Get hired faster with AI resume intelligence",
+    "subtitle": "Deep ATS scoring, recruiter insights, and line-by-line fixes — like Resume Worded, built for modern careers.",
+    "cta": "Analyze my resume"
+  },
+  "upload": {
+    "title": "Upload your resume",
+    "hint": "PDF or DOCX up to 5MB",
+    "analyzing": "Analyzing with AI…"
+  },
+  "report": {
+    "executive_summary": "Executive summary",
+    "section_analysis": "Section analysis",
+    "download_pdf": "Download improved PDF",
+    "job_match": "Match to job",
+    "rerun": "Re-run analysis"
+  }
+}
