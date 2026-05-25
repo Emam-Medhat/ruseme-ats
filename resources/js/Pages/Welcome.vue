@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n';
 import { useAppStore } from '@/stores/app';
 
@@ -10,6 +10,7 @@ defineProps({
 
 const { t } = useI18n();
 const appStore = useAppStore();
+const page = usePage();
 
 const features = [
     { icon: '🎯', title: '20-Section Deep Scan', desc: 'Contact, experience, ATS compliance, grammar, gaps, overlaps & more.' },
@@ -37,7 +38,7 @@ const features = [
         <header class="relative z-20 mx-auto max-w-6xl px-6 py-4 flex items-center justify-between border-b border-zinc-200/40 bg-[#FAF8F5]/75 backdrop-blur-md sticky top-0 shadow-sm shadow-zinc-150/10">
             <div class="flex items-center gap-2.5 font-extrabold text-base tracking-tight text-zinc-950">
                 <span class="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-650 via-violet-650 to-amber-600 shadow-lg shadow-indigo-600/15 font-black text-white text-base">✦</span>
-                {{ $page.props.cvGenius?.name || t('brand') }}
+                {{ page.props.cvGenius?.name || t('brand') }}
             </div>
             <div class="flex items-center gap-4 text-xs font-semibold">
                 <!-- Locale Toggle -->
@@ -49,13 +50,13 @@ const features = [
                     {{ appStore.locale === 'ar' ? 'English' : 'العربية' }}
                 </button>
                 
-                <Link v-if="canLogin && !$page.props.auth?.user" :href="route('login')" class="text-zinc-550 hover:text-zinc-950 transition-colors py-2 px-3">
+                <Link v-if="canLogin && !page.props.auth?.user" :href="route('login')" class="text-zinc-550 hover:text-zinc-950 transition-colors py-2 px-3">
                     {{ t('nav.login') }}
                 </Link>
-                <Link v-if="canRegister && !$page.props.auth?.user" :href="route('register')" class="relative group overflow-hidden rounded-xl bg-gradient-to-r from-indigo-650 to-violet-650 px-6 py-2.5 font-extrabold text-white transition-all hover:shadow-lg hover:shadow-indigo-600/20 hover:scale-[1.01] active:scale-[0.98]">
+                <Link v-if="canRegister && !page.props.auth?.user" :href="route('register')" class="relative group overflow-hidden rounded-xl bg-gradient-to-r from-indigo-650 to-violet-650 px-6 py-2.5 font-extrabold text-white transition-all hover:shadow-lg hover:shadow-indigo-600/20 hover:scale-[1.01] active:scale-[0.98]">
                     <span class="relative z-10">{{ t('nav.register') }}</span>
                 </Link>
-                <Link v-if="$page.props.auth?.user" :href="route('dashboard')" class="rounded-xl bg-gradient-to-r from-indigo-650 to-violet-650 px-6 py-2.5 font-extrabold text-white hover:shadow-lg hover:shadow-indigo-600/20 transition-all hover:scale-[1.01] active:scale-[0.98]">
+                <Link v-if="page.props.auth?.user" :href="route('dashboard')" class="rounded-xl bg-gradient-to-r from-indigo-650 to-violet-650 px-6 py-2.5 font-extrabold text-white hover:shadow-lg hover:shadow-indigo-600/20 transition-all hover:scale-[1.01] active:scale-[0.98]">
                     {{ t('nav.dashboard') }}
                 </Link>
             </div>
@@ -67,7 +68,7 @@ const features = [
                 <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-wider text-amber-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                        {{ $page.props.cvGenius?.tagline || t('tagline') }}
+                        {{ page.props.cvGenius?.tagline || t('tagline') }}
                     </div>
                     <h1 class="text-4xl font-black leading-tight tracking-tight sm:text-6xl text-zinc-950">
                         {{ t('hero.title') }}
@@ -78,7 +79,7 @@ const features = [
                     
                     <!-- Action buttons -->
                     <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
-                        <Link :href="$page.props.auth?.user ? route('upload') : route('register')" class="rounded-2xl bg-gradient-to-r from-indigo-650 via-violet-650 to-indigo-650 px-8 py-4 text-sm font-black text-white shadow-xl shadow-indigo-600/15 hover:shadow-indigo-600/35 hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98] transition-all tracking-wider uppercase">
+                        <Link :href="page.props.auth?.user ? route('upload') : route('register')" class="rounded-2xl bg-gradient-to-r from-indigo-650 via-violet-650 to-indigo-650 px-8 py-4 text-sm font-black text-white shadow-xl shadow-indigo-600/15 hover:shadow-indigo-600/35 hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98] transition-all tracking-wider uppercase">
                             {{ t('hero.cta') }}
                         </Link>
                         <Link :href="route('pricing')" class="rounded-2xl border border-zinc-300 bg-white px-8 py-4 text-sm font-black text-zinc-800 hover:bg-zinc-50 hover:-translate-y-0.5 transition-all tracking-wider uppercase shadow-sm">

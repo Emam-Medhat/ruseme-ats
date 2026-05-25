@@ -1,8 +1,9 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n';
 
 const { t } = useI18n();
+const page = usePage();
 </script>
 
 <template>
@@ -29,11 +30,11 @@ const { t } = useI18n();
                         <span class="text-2xl font-black text-white">✦</span>
                     </div>
                     <span class="text-2xl font-black tracking-tight text-zinc-900 mt-1">
-                        {{ $page.props.cvGenius?.name || t('brand') }}
+                        {{ page.props.cvGenius?.name || t('brand') }}
                     </span>
                 </Link>
                 <p class="text-zinc-400 text-[10px] uppercase font-bold tracking-widest mt-2.5">
-                    {{ $page.props.cvGenius?.tagline || t('tagline') }}
+                    {{ page.props.cvGenius?.tagline || t('tagline') }}
                 </p>
             </div>
 
@@ -49,7 +50,7 @@ const { t } = useI18n();
             
             <!-- Simple Footer Credits -->
             <div class="mt-10 text-center text-zinc-400 text-xs font-semibold tracking-wide">
-                &copy; {{ new Date().getFullYear() }} {{ $page.props.cvGenius?.name || t('brand') }}. All rights reserved.
+                &copy; {{ new Date().getFullYear() }} {{ page.props.cvGenius?.name || t('brand') }}. All rights reserved.
             </div>
         </div>
     </div>
