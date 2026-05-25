@@ -813,12 +813,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, Head } from '@inertiajs/vue3'
+import { Link, Head, usePage } from '@inertiajs/vue3'
 import axios from 'axios'
 import KpiCard from '@/Components/CvGenius/KpiCard.vue'
 import RadarChart from '@/Components/CvGenius/RadarChart.vue'
 import MagicRewriteButton from '@/Components/CvGenius/MagicRewriteButton.vue'
 import MagicRewriteModal from '@/Components/CvGenius/MagicRewriteModal.vue'
+
+const page = usePage()
 
 const props = defineProps({
     resume:       { type: Object, required: true },

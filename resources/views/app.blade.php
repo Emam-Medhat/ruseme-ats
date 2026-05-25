@@ -26,6 +26,22 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
+
+        @if(config('app.env') === 'production')
+            <!-- Plausible Analytics (Privacy-friendly) -->
+            <script defer data-domain="{{ parse_url(config('app.url'), PHP_URL_HOST) }}" src="https://plausible.io/js/script.js"></script>
+
+            <!-- Google Analytics (uncomment and update if needed) -->
+            {{--
+            <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'YOUR_GA_ID');
+            </script>
+            --}}
+        @endif
     </head>
     <body class="font-sans antialiased">
         @inertia

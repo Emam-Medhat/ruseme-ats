@@ -13,6 +13,9 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy');
+Route::get('/terms-of-service', fn () => Inertia::render('Legal/TermsOfService'))->name('terms');
+
 Route::get('/pricing', fn () => Inertia::render('Marketing/Pricing'))->name('pricing.public');
 
 Route::get('/dashboard', function () {
