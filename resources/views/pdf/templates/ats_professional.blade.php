@@ -423,9 +423,34 @@
     @endif
 
     {{-- ══ EDUCATION ══ --}}
-    @if(!empty($cv['education_text']))
-        <div class="section-title">Education</div>
-        <div class="section-content">
+    @if(!empty($cv['education']) && collect($cv['education'])->contains(fn($e) => !empty($e['school']) || !empty($e['dates'])))
+        <div class="section-title" style="page-break-inside: avoid;">Education</div>
+        @foreach($cv['education'] as $edu)
+            <div class="edu-entry" style="page-break-inside: avoid;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2px;">
+                    <tr>
+                        <td style="text-align: left; font-weight: bold; font-size: 11pt;">{{ $edu['school'] ?: $edu['degree'] }}</td>
+                        <td style="text-align: right; font-size: 11pt; white-space: nowrap; font-weight: bold;">{{ $edu['dates'] ?? '' }}</td>
+                    </tr>
+                    @if(!empty($edu['school']))
+                    <tr>
+                        <td style="text-align: left; font-style: italic; font-size: 11pt;">
+                            {{ $edu['degree'] ?? '' }}
+                            @if(!empty($edu['honors']))
+                                &nbsp;&middot;&nbsp; <span style="font-weight: normal; font-style: normal; color: #444; font-size: 10pt;">{{ $edu['honors'] }}</span>
+                            @endif
+                        </td>
+                        @if(!empty($edu['location']))
+                            <td style="text-align: right; font-style: italic; font-size: 11pt; color: #222;">{{ $edu['location'] }}</td>
+                        @endif
+                    </tr>
+                    @endif
+                </table>
+            </div>
+        @endforeach
+    @elseif(!empty($cv['education_text']))
+        <div class="section-title" style="page-break-inside: avoid;">Education</div>
+        <div class="section-content" style="page-break-inside: avoid;">
             @php
                 $eduHtml = e($cv['education_text']);
                 $eduHtml = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $eduHtml);
@@ -434,21 +459,6 @@
             @endphp
             {!! $eduHtml !!}
         </div>
-
-    @elseif(!empty($cv['education']))
-        <div class="section-title">Education</div>
-        @foreach($cv['education'] as $edu)
-            <div class="edu-entry">
-                <div class="edu-header">
-                    <span class="edu-left">{{ $edu['school'] ?? '' }}</span>
-                    <span class="edu-right">{{ $edu['dates'] ?? '' }}</span>
-                </div>
-                <div class="edu-sub">{{ $edu['degree'] ?? '' }}</div>
-                @if(!empty($edu['location']))
-                    <div style="font-size:10.5pt; color:#222;">{{ $edu['location'] }}</div>
-                @endif
-            </div>
-        @endforeach
     @endif
 
     {{-- ══ CERTIFICATIONS ══ --}}

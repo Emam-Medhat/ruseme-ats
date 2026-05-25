@@ -5,7 +5,7 @@
     <title>{{ $cv['name'] ?? 'Resume' }}</title>
     <style>
         @page {
-            margin: 1.8cm 2cm;
+            margin: 1.5cm 1.8cm;
         }
         * {
             margin: 0;
@@ -13,31 +13,23 @@
             box-sizing: border-box;
         }
         body {
-            font-family: Arial, Helvetica, "Trebuchet MS", sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 10pt;
             line-height: 1.35;
             color: #2d3748;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
         /* ── HEADER ── */
-        .header {
-            text-align: left;
-            margin-bottom: 12pt;
-            border-bottom: 2px solid #4a5568;
-            padding-bottom: 8pt;
-        }
         .name {
             font-size: 20pt;
-            font-weight: 800;
+            font-weight: bold;
             color: #1a202c;
             letter-spacing: -0.5px;
             margin-bottom: 2pt;
         }
         .title {
             font-size: 11pt;
-            font-weight: 600;
+            font-weight: bold;
             color: #4f46e5;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -46,7 +38,7 @@
         .contact {
             font-size: 9pt;
             color: #718096;
-            margin-top: 2px;
+            margin-bottom: 8pt;
         }
         .contact a {
             color: #4f46e5;
@@ -55,13 +47,13 @@
 
         /* ── SECTIONS ── */
         .section-title {
-            font-size: 10.5pt;
+            font-size: 11pt;
             font-weight: bold;
             color: #1a202c;
             text-transform: uppercase;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1.5px solid #e2e8f0;
             padding-bottom: 3px;
-            margin-top: 14pt;
+            margin-top: 12pt;
             margin-bottom: 6pt;
             letter-spacing: 0.5px;
         }
@@ -73,56 +65,22 @@
         /* ── JOB ENTRY ── */
         .job {
             margin-bottom: 8pt;
-            page-break-inside: avoid;
         }
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+        .entry-table {
             width: 100%;
-            margin-bottom: 1px;
+            border-collapse: collapse;
+            margin-bottom: 2px;
         }
-        .job-header-left {
-            font-weight: bold;
-            font-size: 10pt;
-            color: #1a202c;
-            flex: 1;
-            padding-right: 8px;
-        }
-        .job-header-right {
-            font-weight: bold;
-            font-size: 10pt;
-            color: #4a5568;
-            white-space: nowrap;
-            text-align: right;
-        }
-        .job-subheader {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            width: 100%;
-            margin-bottom: 4px;
-        }
-        .job-subheader-left {
-            font-style: italic;
-            font-size: 10pt;
-            color: #4f46e5;
-            flex: 1;
-            padding-right: 8px;
-        }
-        .job-subheader-right {
-            font-style: italic;
-            font-size: 10pt;
-            color: #718096;
-            white-space: nowrap;
-            text-align: right;
+        .entry-table td {
+            padding: 0;
+            vertical-align: baseline;
         }
 
         /* ── BULLETS ── */
         ul.bullets {
-            margin: 3px 0 3px 0;
-            padding-left: 14px;
-            list-style-type: square;
+            margin: 3px 0;
+            padding-left: 16px;
+            list-style-type: disc;
         }
         ul.bullets li {
             font-size: 9.5pt;
@@ -132,10 +90,9 @@
             text-align: justify;
         }
         .tech-line {
-            font-style: normal;
             font-weight: bold;
             font-size: 9pt;
-            margin-top: 2px;
+            margin-top: 3px;
             color: #4f46e5;
         }
 
@@ -158,63 +115,19 @@
             width: 1%;
         }
 
-        /* ── PROJECTS ── */
+        /* ── PROJECTS & EDUCATION ── */
         .project {
-            margin-bottom: 7pt;
-            page-break-inside: avoid;
+            margin-bottom: 6pt;
         }
-        .project-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 2px;
-        }
-        .project-name {
-            font-weight: bold;
-            font-size: 10pt;
-            color: #1a202c;
-        }
-        .project-desc {
-            font-size: 9.5pt;
-            line-height: 1.35;
-            color: #4a5568;
-            margin-bottom: 2px;
-        }
-
-        /* ── EDUCATION ── */
         .edu-entry {
             margin-bottom: 5pt;
-            page-break-inside: avoid;
-        }
-        .edu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-        .edu-left {
-            font-weight: bold;
-            font-size: 10pt;
-            color: #1a202c;
-            flex: 1;
-            padding-right: 8px;
-        }
-        .edu-right {
-            font-size: 10pt;
-            color: #4a5568;
-            white-space: nowrap;
-            text-align: right;
-        }
-        .edu-sub {
-            font-style: italic;
-            font-size: 10pt;
-            color: #4f46e5;
         }
     </style>
 </head>
 <body>
 
     {{-- ══ HEADER ══ --}}
-    <div class="header">
+    <div style="margin-bottom: 8pt; border-bottom: 2px solid #4a5568; padding-bottom: 8pt;">
         <div class="name">{{ $cv['name'] }}</div>
         @if(!empty($cv['title']))
             <div class="title">{{ $cv['title'] }}</div>
@@ -283,17 +196,21 @@
                 }
             @endphp
 
-            <div class="job">
-                <div class="job-header">
-                    <span class="job-header-left">{{ $company }}</span>
-                    <span class="job-header-right">{{ $job['dates'] ?? '' }}</span>
-                </div>
-                <div class="job-subheader">
-                    <span class="job-subheader-left">{{ $job['job_title'] ?? '' }}</span>
-                    @if($location)
-                        <span class="job-subheader-right">{{ $location }}</span>
-                    @endif
-                </div>
+            <div class="job" style="page-break-inside: avoid;">
+                <table class="entry-table" style="font-weight: bold; font-size: 10pt; color: #1a202c;">
+                    <tr>
+                        <td style="text-align: left;">{{ $company }}</td>
+                        <td style="text-align: right; color: #4a5568; white-space: nowrap;">{{ $job['dates'] ?? '' }}</td>
+                    </tr>
+                </table>
+                <table class="entry-table" style="font-size: 9.5pt; margin-bottom: 2px;">
+                    <tr>
+                        <td style="text-align: left; font-style: italic; color: #4f46e5;">{{ $job['job_title'] ?? '' }}</td>
+                        @if($location)
+                            <td style="text-align: right; font-style: italic; color: #718096; white-space: nowrap;">{{ $location }}</td>
+                        @endif
+                    </tr>
+                </table>
 
                 @if(!empty($filteredBullets))
                     <ul class="bullets">
@@ -317,8 +234,8 @@
 
     {{-- ══ SKILLS ══ --}}
     @if(!empty($cv['skills_text']))
-        <div class="section-title">Core Skills</div>
-        <div class="section-content">
+        <div class="section-title" style="page-break-inside: avoid;">Core Skills</div>
+        <div class="section-content" style="page-break-inside: avoid;">
             @php
                 $lines = preg_split('/\r?\n|·{2,}/', $cv['skills_text']);
                 $rows  = [];
@@ -361,7 +278,7 @@
 
     {{-- ══ PROJECTS ══ --}}
     @if(!empty($cv['projects']))
-        <div class="section-title">Projects & Highlights</div>
+        <div class="section-title" style="page-break-inside: avoid;">Projects & Highlights</div>
         @php
             $projectsRaw = $cv['projects'];
             $isStructured = is_array($projectsRaw);
@@ -382,17 +299,19 @@
                         }
                     }
                 @endphp
-                <div class="project">
-                    <div class="project-header">
-                        <span class="project-name">{{ $proj['name'] ?? '' }}</span>
-                        @if(!empty($proj['link']))
-                            <span style="font-size:9pt; font-style:italic;">
-                                <a href="{{ $proj['link'] }}" style="color: #4f46e5;">{{ preg_replace('/^https?:\/\//', '', $proj['link']) }}</a>
-                            </span>
-                        @endif
-                    </div>
+                <div class="project" style="page-break-inside: avoid;">
+                    <table class="entry-table">
+                        <tr>
+                            <td style="text-align: left; font-weight: bold; color: #1a202c;">{{ $proj['name'] ?? '' }}</td>
+                            @if(!empty($proj['link']))
+                                <td style="text-align: right; font-size: 9pt;">
+                                    <a href="{{ $proj['link'] }}" style="color: #4f46e5;">{{ preg_replace('/^https?:\/\//', '', $proj['link']) }}</a>
+                                </td>
+                            @endif
+                        </tr>
+                    </table>
                     @if($projDesc)
-                        <div class="project-desc">{{ $projDesc }}</div>
+                        <div style="font-size: 9.5pt; color: #4a5568; margin-bottom: 2px;">{{ $projDesc }}</div>
                     @endif
                     @if(!empty($projBullets))
                         <ul class="bullets">
@@ -411,7 +330,7 @@
                 </div>
             @endforeach
         @else
-            <div class="section-content" style="color: #4a5568;">
+            <div class="section-content" style="color: #4a5568; page-break-inside: avoid;">
                 @php
                     $projectsHtml = e($projectsRaw);
                     $projectsHtml = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $projectsHtml);
@@ -424,9 +343,34 @@
     @endif
 
     {{-- ══ EDUCATION ══ --}}
-    @if(!empty($cv['education_text']))
-        <div class="section-title">Education</div>
-        <div class="section-content" style="color: #4a5568;">
+    @if(!empty($cv['education']) && collect($cv['education'])->contains(fn($e) => !empty($e['school']) || !empty($e['dates'])))
+        <div class="section-title" style="page-break-inside: avoid;">Education</div>
+        @foreach($cv['education'] as $edu)
+            <div class="edu-entry" style="page-break-inside: avoid;">
+                <table class="entry-table">
+                    <tr>
+                        <td style="text-align: left; font-weight: bold; color: #1a202c;">{{ $edu['school'] ?: $edu['degree'] }}</td>
+                        <td style="text-align: right; color: #4a5568; font-weight: bold;">{{ $edu['dates'] ?? '' }}</td>
+                    </tr>
+                    @if(!empty($edu['school']))
+                    <tr>
+                        <td style="text-align: left; font-style: italic; color: #2563EB;">
+                            {{ $edu['degree'] ?? '' }}
+                            @if(!empty($edu['honors']))
+                                &nbsp;&middot;&nbsp; <span style="font-weight: normal; font-style: normal; color: #718096; font-size: 8.5pt;">{{ $edu['honors'] }}</span>
+                            @endif
+                        </td>
+                        @if(!empty($edu['location']))
+                            <td style="text-align: right; font-style: italic; color: #718096;">{{ $edu['location'] }}</td>
+                        @endif
+                    </tr>
+                    @endif
+                </table>
+            </div>
+        @endforeach
+    @elseif(!empty($cv['education_text']))
+        <div class="section-title" style="page-break-inside: avoid;">Education</div>
+        <div class="section-content" style="color: #4a5568; page-break-inside: avoid;">
             @php
                 $eduHtml = e($cv['education_text']);
                 $eduHtml = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $eduHtml);
@@ -435,26 +379,12 @@
             @endphp
             {!! $eduHtml !!}
         </div>
-    @elseif(!empty($cv['education']))
-        <div class="section-title">Education</div>
-        @foreach($cv['education'] as $edu)
-            <div class="edu-entry">
-                <div class="edu-header">
-                    <span class="edu-left">{{ $edu['school'] ?? '' }}</span>
-                    <span class="edu-right">{{ $edu['dates'] ?? '' }}</span>
-                </div>
-                <div class="edu-sub">{{ $edu['degree'] ?? '' }}</div>
-                @if(!empty($edu['location']))
-                    <div style="font-size:9.5pt; color:#4a5568;">{{ $edu['location'] }}</div>
-                @endif
-            </div>
-        @endforeach
     @endif
 
     {{-- ══ CERTIFICATIONS ══ --}}
     @if(!empty($cv['certifications']))
-        <div class="section-title">Certifications</div>
-        <div class="section-content" style="color: #4a5568;">
+        <div class="section-title" style="page-break-inside: avoid;">Certifications</div>
+        <div class="section-content" style="color: #4a5568; page-break-inside: avoid;">
             @php
                 $certHtml = e($cv['certifications']);
                 $certHtml = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $certHtml);
@@ -466,8 +396,8 @@
 
     {{-- ══ LANGUAGES ══ --}}
     @if(!empty($cv['languages']))
-        <div class="section-title">Languages</div>
-        <div class="section-content" style="color: #4a5568;">
+        <div class="section-title" style="page-break-inside: avoid;">Languages</div>
+        <div class="section-content" style="color: #4a5568; page-break-inside: avoid;">
             @php
                 $langHtml = e($cv['languages']);
                 $langHtml = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $langHtml);

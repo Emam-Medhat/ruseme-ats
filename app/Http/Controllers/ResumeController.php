@@ -280,7 +280,7 @@ class ResumeController extends Controller
             'resume_sections' => 'required|array',
             'overall_score' => 'nullable|integer|min:0|max:100',
             'parsed_text' => 'nullable|string',
-            'template' => 'nullable|string|in:ats,clean,modern,executive,ats_classic,ats_modern,ats_executive,ats_tech,ats_elegant',
+            'template' => 'nullable|string|in:ats,clean,modern,executive,ats_classic,ats_modern,ats_executive,ats_tech,ats_elegant,ats_professional',
         ]);
 
         $report = $resume->analysisReports()->latest()->first();
@@ -317,7 +317,7 @@ class ResumeController extends Controller
             default => $template,
         };
 
-        $allowed = ['ats_classic', 'ats_modern', 'ats_executive', 'ats_tech', 'ats_elegant'];
+        $allowed = ['ats_classic', 'ats_modern', 'ats_executive', 'ats_tech', 'ats_elegant', 'ats_professional'];
         $template = in_array($template, $allowed, true) ? $template : 'ats_classic';
 
         $assembler = new ResumePdfAssembler();

@@ -251,7 +251,7 @@ class ResumePdfAssembler
     }
 
     /**
-     * @return list<array{degree: string, school: string, dates: string}>
+     * @return list<array{degree: string, school: string, dates: string, honors: string}>
      */
     private function normalizeEducation(string $education): array
     {
@@ -268,10 +268,76 @@ class ResumePdfAssembler
             if ($line === '') {
                 continue;
             }
+
+            // Extract honors first if present
+            $honors = '';
+            // Heuristic for honors (e.g. GPA 3.9, Honors, Cum Laude, Distinction, Grade A, etc. and Arabic terms)
+            $honorsRegex = '/\b(summa\s+)?cum\s+laude\b|\bmagna\s+cum\s+laude\b|\bdistinction\b|\bmerit\b|\bfirst\s+class\b|\bhonou?rs\b|\bgpa\s*[\d\.]+\/?[\d\.]*|\bgrade\s*[A-F][+-]?|\bامتياز\b|\bتقدير\b|\bبدرجة\s+شرف\b/i';
+            if (preg_match($honorsRegex, $line, $matches)) {
+                // If it's part of parentheses, let's extract the whole parentheses content if it has honors keywords
+                if (preg_match('/\(([^)]*(?:summa|cum\s+laude|magna|distinction|merit|honou?rs|gpa|grade|امتياز|تقدير)[^)]*)\)/i', $line, $parenMatch)) {
+                    $honors = $parenMatch[1];
+                    $line = str_replace($parenMatch[0], '', $line);
+                } else {
+                    $honors = $matches[0];
+                    $line = str_replace($matches[0], '', $line);
+                }
+            }
+
+            // Extract dates first if present to make parsing school and degree easier
+            $dates = '';
+            $dateRegex = '/\b((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\.\,]*\d{4}|\d{4})\s*[\-–—\s\btoحتى]+\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\.\,]*\d{4}|\d{4}|present|current|الآن|حتى الآن|حالي)\b|\b\d{4}\b/i';
+            if (preg_match($dateRegex, $line, $matches)) {
+                // Check if enclosed in parentheses
+                if (preg_match('/\(([^)]*(?:19|20)\d{2}[^)]*)\)/i', $line, $parenMatch)) {
+                    $dates = $parenMatch[1];
+                    $line = str_replace($parenMatch[0], '', $line);
+                } else {
+                    $dates = $matches[0];
+                    $line = str_replace($matches[0], '', $line);
+                }
+            }
+
+            // Clean up delimiters after extraction
+            $line = preg_replace('/\s*[\-–—,|\(\)\|]+\s*$/', '', $line);
+            $line = preg_replace('/^\s*[\-–—,|\(\)\|]+\s*/', '', $line);
+
+            // Now parse school and degree from the remaining part
+            $parts = preg_split('/\s*,\s*|\s*-\s*|\s*\|\s*|\s*–\s*|\s*—\s*/', $line);
+            $degree = $line;
+            $school = '';
+
+            if (count($parts) >= 2) {
+                // Detect school/university
+                $schoolIdx = -1;
+                foreach ($parts as $idx => $part) {
+                    if (preg_match('/university|college|institute|school|academy|جامعة|معهد|كلية/i', $part)) {
+                        $schoolIdx = $idx;
+                        break;
+                    }
+                }
+
+                if ($schoolIdx !== -1) {
+                    $school = $parts[$schoolIdx];
+                    unset($parts[$schoolIdx]);
+                    $degree = implode(', ', array_map('trim', $parts));
+                } else {
+                    // If no school keyword, assume first part is school if it contains degree-like words
+                    if (preg_match('/\b(bachelor|master|doctor|phd|diploma|bsc|msc|ba|ma|bba|mba|degree|بكالوريوس|ماجستير|دكتوراه|دبلوم)\b/i', $parts[1])) {
+                        $school = $parts[0];
+                        $degree = $parts[1];
+                    } else {
+                        $degree = $parts[0];
+                        $school = $parts[1];
+                    }
+                }
+            }
+
             $entries[] = [
-                'degree' => $line,
-                'school' => '',
-                'dates' => '',
+                'degree' => $this->cleanLine($degree),
+                'school' => $this->cleanLine($school),
+                'dates' => $this->cleanLine($dates),
+                'honors' => $this->cleanLine($honors),
             ];
         }
 

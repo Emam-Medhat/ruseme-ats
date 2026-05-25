@@ -21,33 +21,41 @@ const submit = () => {
     <GuestLayout>
         <Head title="Confirm Password" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
+        <div class="mb-6 text-center sm:text-left">
+            <h2 class="text-2xl font-black tracking-tight text-zinc-900">Confirm Security</h2>
+            <p class="mt-2 text-xs text-zinc-500 leading-relaxed font-semibold">
+                This is a secure area of the application. Please confirm your password before continuing.
+            </p>
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
+        <form @submit.prevent="submit" class="space-y-5">
+            <div class="space-y-2">
                 <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    autofocus
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 text-xs">
+                        🔒
+                    </span>
+                    <input
+                        id="password"
+                        type="password"
+                        class="pl-10 block w-full rounded-xl border border-zinc-200 bg-zinc-50/40 py-3 text-zinc-900 placeholder-zinc-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition-all text-xs font-semibold shadow-inner"
+                        v-model="form.password"
+                        required
+                        autocomplete="current-password"
+                        autofocus
+                        placeholder="••••••••"
+                    />
+                </div>
+                <InputError class="mt-1" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 flex justify-end">
+            <div class="pt-2">
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+                    class="w-full uppercase font-black tracking-wider text-xs py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl active:scale-[0.98] transition-all shadow-md shadow-indigo-600/10"
+                    :class="{ 'opacity-50': form.processing }"
                     :disabled="form.processing"
                 >
-                    Confirm
+                    Confirm Password
                 </PrimaryButton>
             </div>
         </form>

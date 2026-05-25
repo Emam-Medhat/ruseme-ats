@@ -2,7 +2,7 @@
 import AnalysisLoadingOverlay from '@/Components/CvGenius/AnalysisLoadingOverlay.vue';
 import { useAnalysisLoaderStore } from '@/stores/analysisLoader';
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const analysisLoader = useAnalysisLoaderStore();
@@ -11,44 +11,56 @@ const { visible: analysisVisible, progress: analysisProgress } = storeToRefs(ana
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 
-const scrolled = ref(false);
-
-const onScroll = () => {
-    scrolled.value = window.scrollY > 8;
-};
-
-onMounted(() => {
-    window.addEventListener('scroll', onScroll, { passive: true });
-});
-
-onUnmounted(() => {
-    window.removeEventListener('scroll', onScroll);
-});
+const sidebarOpen = ref(true);
+const mobileMenuOpen = ref(false);
 
 const creditsClass = computed(() => {
     const c = user.value?.credits ?? 0;
-    if (c > 5) {
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    }
-    if (c >= 2) {
-        return 'bg-amber-50 text-amber-800 border-amber-200';
-    }
-    return 'bg-rose-50 text-rose-700 border-rose-200';
+    if (c > 5) return 'text-success-600 dark:text-success-400';
+    if (c >= 2) return 'text-warning-600 dark:text-warning-400';
+    return 'text-danger-600 dark:text-danger-400';
 });
 
 const initials = computed(() => {
     const name = user.value?.name || '';
     const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) {
-        return '?';
-    }
-    if (parts.length === 1) {
-        return parts[0].slice(0, 2).toUpperCase();
-    }
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 });
 
-const mobileOpen = ref(false);
+const navItems = computed(() => [
+    {
+        name: 'Dashboard',
+        href: route('dashboard'),
+        icon: 'home',
+        active: route().current('dashboard'),
+    },
+    {
+        name: 'Upload',
+        href: route('upload'),
+        icon: 'upload',
+        active: route().current('upload'),
+    },
+    {
+        name: 'History',
+        href: route('history'),
+        icon: 'history',
+        active: route().current('history'),
+    },
+    {
+        name: 'Pricing',
+        href: route('pricing'),
+        icon: 'pricing',
+        active: route().current('pricing'),
+    },
+    {
+        name: 'How It Works',
+        href: route('how-it-works'),
+        icon: 'info',
+        active: route().current('how-it-works'),
+    },
+]);
 </script>
 
 <template>
@@ -59,206 +71,161 @@ const mobileOpen = ref(false);
         :step-state="analysisLoader.stepState"
     />
 
-    <div class="flex min-h-screen flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-        <nav
+    <div class="flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 font-sans">
+        <!-- Mobile Overlay -->
+        <div
+            v-if="mobileMenuOpen"
+            class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-40 lg:hidden"
+            @click="mobileMenuOpen = false"
+        ></div>
+
+        <!-- Sidebar -->
+        <aside
             :class="[
-                'fixed inset-x-0 top-0 z-50 border-b transition-all duration-300',
-                scrolled
-                    ? 'border-primary-light/80 bg-white/90 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/90'
-                    : 'border-primary-light bg-white/95 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/95',
+                'fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 lg:static',
+                sidebarOpen ? 'w-64' : 'w-20',
+                mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             ]"
         >
-            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                <div class="flex items-center gap-8">
-                    <Link href="/" class="flex items-center gap-2 text-lg font-black text-primary">
-                        <span aria-hidden="true">⚡</span>
-                        <span>{{ page.props.cvGenius?.name || 'CV Genius AI' }}</span>
-                    </Link>
-                    <div class="hidden items-center gap-6 text-sm font-semibold text-zinc-600 dark:text-zinc-300 md:flex">
-                        <Link
-                            :href="route('dashboard')"
-                            class="border-b-2 border-transparent pb-0.5 transition hover:text-primary"
-                            :class="{ '!border-primary text-primary': route().current('dashboard') }"
-                        >
-                            Dashboard
-                        </Link>
-                        <Link
-                            :href="route('upload')"
-                            class="border-b-2 border-transparent pb-0.5 transition hover:text-primary"
-                            :class="{ '!border-primary text-primary': route().current('upload') }"
-                        >
-                            Upload
-                        </Link>
-                        <Link
-                            :href="route('history')"
-                            class="border-b-2 border-transparent pb-0.5 transition hover:text-primary"
-                            :class="{ '!border-primary text-primary': route().current('history') }"
-                        >
-                            History
-                        </Link>
-                        <Link
-                            :href="route('pricing')"
-                            class="border-b-2 border-transparent pb-0.5 transition hover:text-primary"
-                            :class="{ '!border-primary text-primary': route().current('pricing') }"
-                        >
-                            Pricing
-                        </Link>
-                        <Link
-                            :href="route('how-it-works')"
-                            class="border-b-2 border-transparent pb-0.5 transition hover:text-primary"
-                            :class="{ '!border-primary text-primary': route().current('how-it-works') }"
-                        >
-                            How It Works
-                        </Link>
+            <!-- Logo -->
+            <div class="flex items-center justify-between px-5 h-16 border-b border-neutral-200 dark:border-neutral-800">
+                <Link href="/" class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 shadow-md shadow-primary-500/20 font-black text-white text-lg">
+                        ✦
                     </div>
-                </div>
-
-                <div class="hidden items-center gap-4 md:flex" v-if="user">
-                    <div
-                        :class="[
-                            'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold',
-                            creditsClass,
-                        ]"
+                    <span
+                        v-if="sidebarOpen"
+                        class="text-lg font-extrabold tracking-tight text-neutral-900 dark:text-white"
                     >
-                        <span aria-hidden="true">🪙</span>
-                        <span>{{ user.credits }} credits</span>
-                    </div>
-
-                    <div class="relative group">
-                        <button
-                            type="button"
-                            class="flex items-center gap-2 rounded-full border border-primary-light px-2 py-1 text-left transition hover:border-primary/40 dark:border-zinc-700"
-                        >
-                            <span
-                                class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light text-xs font-black text-primary dark:bg-primary/20"
-                            >
-                                {{ initials }}
-                            </span>
-                            <span class="max-w-[120px] truncate text-sm font-semibold">{{ user.name }}</span>
-                            <svg class="h-4 w-4 text-zinc-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </button>
-                        <div
-                            class="pointer-events-none invisible absolute right-0 mt-2 w-48 origin-top-right scale-95 rounded-xl border border-primary-light bg-white py-1 text-sm opacity-0 shadow-lg transition group-hover:pointer-events-auto group-hover:visible group-hover:scale-100 group-hover:opacity-100 dark:border-zinc-700 dark:bg-zinc-900"
-                        >
-                            <Link
-                                :href="route('profile.edit')"
-                                class="block px-4 py-2 font-medium text-zinc-700 hover:bg-primary-light/60 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                            >
-                                Profile
-                            </Link>
-                            <Link
-                                href="#"
-                                class="block px-4 py-2 font-medium text-zinc-500 hover:bg-primary-light/40 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                            >
-                                Settings
-                            </Link>
-                            <div class="my-1 border-t border-primary-light dark:border-zinc-700" />
-                            <Link
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                                class="block w-full px-4 py-2 text-left font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-zinc-800"
-                            >
-                                Logout
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
+                        {{ page.props.cvGenius?.name || 'CV Genius AI' }}
+                    </span>
+                </Link>
                 <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-lg border border-zinc-200 p-2 md:hidden dark:border-zinc-700"
-                    @click="mobileOpen = !mobileOpen"
-                    aria-label="Menu"
+                    v-if="sidebarOpen"
+                    @click="sidebarOpen = !sidebarOpen"
+                    class="hidden lg:flex p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                 >
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
+                    <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
             </div>
 
-            <div
-                v-show="mobileOpen"
-                class="border-t border-primary-light bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950 md:hidden"
-            >
-                <div class="flex flex-col gap-3 text-sm font-semibold">
-                    <Link :href="route('dashboard')" @click="mobileOpen = false">Dashboard</Link>
-                    <Link :href="route('history')" @click="mobileOpen = false">History</Link>
-                    <Link :href="route('pricing')" @click="mobileOpen = false">Pricing</Link>
-                    <Link :href="route('how-it-works')" @click="mobileOpen = false">How It Works</Link>
-                    <Link v-if="user" :href="route('profile.edit')" @click="mobileOpen = false">Profile</Link>
-                </div>
-            </div>
-        </nav>
+            <!-- Navigation -->
+            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <template v-for="item in navItems" :key="item.href">
+                    <Link
+                        :href="item.href"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group',
+                            item.active
+                                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
+                                : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100',
+                        ]"
+                    >
+                        <!-- Home Icon -->
+                        <svg v-if="item.icon === 'home'" class="w-5 h-5 flex-shrink-0" :class="[item.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <!-- Upload Icon -->
+                        <svg v-else-if="item.icon === 'upload'" class="w-5 h-5 flex-shrink-0" :class="[item.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <!-- History Icon -->
+                        <svg v-else-if="item.icon === 'history'" class="w-5 h-5 flex-shrink-0" :class="[item.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <!-- Pricing Icon -->
+                        <svg v-else-if="item.icon === 'pricing'" class="w-5 h-5 flex-shrink-0" :class="[item.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <!-- Info Icon -->
+                        <svg v-else class="w-5 h-5 flex-shrink-0" :class="[item.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span v-if="sidebarOpen">{{ item.name }}</span>
+                    </Link>
+                </template>
+            </nav>
 
-        <div class="flex-1 pt-[72px]">
-            <div v-if="$slots.pageHeader" class="border-b border-primary-light/80 bg-white/80 dark:border-zinc-800 dark:bg-zinc-950/80">
-                <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                    <slot name="pageHeader" />
+            <!-- User Section -->
+            <div v-if="user" class="p-3 border-t border-neutral-200 dark:border-neutral-800">
+                <div class="flex items-center gap-3 px-3 py-2.5">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/10 to-secondary-500/15 text-primary-600 dark:text-primary-400 font-bold border border-primary-500/20">
+                        {{ initials }}
+                    </div>
+                    <div v-if="sidebarOpen" class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">{{ user.name }}</p>
+                        <p class="text-xs font-medium" :class="creditsClass">
+                            🪙 {{ user.credits }} credits
+                        </p>
+                    </div>
+                </div>
+                <div v-if="sidebarOpen" class="mt-2 space-y-1">
+                    <Link
+                        :href="route('profile.edit')"
+                        class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Profile Settings
+                    </Link>
+                    <Link
+                        :href="route('logout')"
+                        method="post"
+                        as="button"
+                        class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-danger-600 dark:text-danger-400 rounded-lg hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors w-full"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        Sign Out
+                    </Link>
                 </div>
             </div>
-            <main>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Top Navbar -->
+            <header class="h-16 flex items-center justify-between px-6 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="lg:hidden p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                        <svg class="w-6 h-6 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <button
+                        v-if="!sidebarOpen"
+                        @click="sidebarOpen = !sidebarOpen"
+                        class="hidden lg:flex p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                        <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div v-if="$slots.pageHeader">
+                        <slot name="pageHeader" />
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+                        <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 overflow-auto">
                 <slot />
             </main>
         </div>
-
-        <footer class="bg-cvgenius-footer text-white/70">
-            <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
-                <div class="space-y-4">
-                    <div class="text-lg font-black text-white">
-                        <span class="text-primary-light">⚡</span> CVGenius
-                    </div>
-                    <p class="text-sm leading-relaxed">
-                        AI-powered resume optimization for Arab job seekers
-                    </p>
-                    <div class="flex gap-3 text-white/80">
-                        <a href="#" class="hover:text-primary" aria-label="LinkedIn">in</a>
-                        <a href="#" class="hover:text-primary" aria-label="Twitter">𝕏</a>
-                        <a href="#" class="hover:text-primary" aria-label="Instagram">◎</a>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="mb-4 text-sm font-bold text-white">Product</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="transition hover:text-primary">Features</a></li>
-                        <li><Link :href="route('pricing')" class="transition hover:text-primary">Pricing</Link></li>
-                        <li><a href="#" class="transition hover:text-primary">Templates</a></li>
-                        <li><Link :href="route('how-it-works')" class="transition hover:text-primary">How It Works</Link></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="mb-4 text-sm font-bold text-white">Company</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="transition hover:text-primary">About</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Blog</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Careers</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Press</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="mb-4 text-sm font-bold text-white">Support</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="transition hover:text-primary">Help Center</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Contact</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Privacy Policy</a></li>
-                        <li><a href="#" class="transition hover:text-primary">Terms</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-white/10 py-6 text-center text-xs text-white/50">
-                © 2025 CVGenius · Built with ❤️ for Arab job seekers
-            </div>
-        </footer>
     </div>
 </template>

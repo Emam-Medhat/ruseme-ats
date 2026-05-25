@@ -5,13 +5,11 @@ export const useAppStore = defineStore('app', {
         locale: typeof window !== 'undefined'
             ? (localStorage.getItem('cv_locale') || 'en')
             : 'en',
-        theme: typeof window !== 'undefined'
-            ? (localStorage.getItem('cv_theme') || 'light')
-            : 'light',
+        theme: 'light',
     }),
     getters: {
         isRtl: (state) => state.locale === 'ar',
-        isDark: (state) => state.theme === 'dark',
+        isDark: (state) => false,
     },
     actions: {
         setLocale(locale) {
@@ -23,10 +21,11 @@ export const useAppStore = defineStore('app', {
             }
         },
         toggleTheme() {
-            this.theme = this.theme === 'dark' ? 'light' : 'dark';
+            // Force light mode
+            this.theme = 'light';
             if (typeof document !== 'undefined') {
-                document.documentElement.classList.toggle('dark', this.theme === 'dark');
-                localStorage.setItem('cv_theme', this.theme);
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('cv_theme', 'light');
             }
         },
         initFromPage(pageProps) {
@@ -35,7 +34,7 @@ export const useAppStore = defineStore('app', {
                 this.setLocale(locale);
             }
             if (typeof document !== 'undefined') {
-                document.documentElement.classList.toggle('dark', this.theme === 'dark');
+                document.documentElement.classList.remove('dark');
             }
         },
     },

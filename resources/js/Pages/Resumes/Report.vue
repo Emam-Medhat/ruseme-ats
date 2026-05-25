@@ -1,262 +1,432 @@
 <template>
-  <Head title="Resume Analysis Report" />
+  <Head title="Resume Analytics Dashboard" />
 
-  <!-- ================= TOP NAVBAR ================= -->
-  <nav class="fixed inset-x-0 top-0 z-50 border-b border-[#e5e3df] bg-white/95 backdrop-blur-sm h-[52px] flex items-center shrink-0">
-    <div class="w-full flex items-center justify-between px-5 gap-4">
+  <!-- ================= TOP NAV BAR ================= -->
+  <nav class="fixed inset-x-0 top-0 z-50 border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md h-[56px] flex items-center shrink-0">
+    <div class="w-full max-w-[1600px] mx-auto flex items-center justify-between px-6 gap-4">
       <!-- Logo -->
-      <Link href="/" class="flex items-center gap-2 text-sm font-black text-[#4f46e5] shrink-0">
-        <span>⚡</span>
-        <span class="hidden sm:inline">CV Genius AI</span>
+      <Link href="/" class="flex items-center gap-2.5 text-sm font-black text-zinc-900 dark:text-white shrink-0 group">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-600 to-indigo-600 flex items-center justify-center font-black text-white text-base shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-250">✦</div>
+        <span class="tracking-tight font-extrabold">{{ page.props.cvGenius?.name || 'CV Genius AI' }} <span class="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent font-black">Pro</span></span>
       </Link>
 
-      <!-- Nav Links -->
-      <div class="hidden md:flex items-center gap-5 text-xs font-semibold text-[#6b7280]">
-        <Link :href="route('dashboard')" class="hover:text-[#4f46e5] transition-colors">Dashboard</Link>
-        <Link :href="route('upload')" class="hover:text-[#4f46e5] transition-colors">Upload</Link>
-        <Link :href="route('history')" class="hover:text-[#4f46e5] transition-colors">History</Link>
-        <Link :href="route('pricing')" class="hover:text-[#4f46e5] transition-colors">Pricing</Link>
-      </div>
-
-      <!-- Right: Resume title pill + user -->
-      <div class="flex items-center gap-3 shrink-0">
-        <span class="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold text-[#4f46e5] bg-[#eef2ff] border border-[#c7d2fe] px-3 py-1 rounded-full truncate max-w-[200px]">
+      <!-- Centered Active Pill -->
+      <div class="hidden sm:flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 border border-indigo-500/15 px-3 py-1 rounded-full truncate max-w-[250px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
           📄 {{ resume.filename || resume.title }}
         </span>
+        <span class="text-[9px] font-black px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          PRO SCAN ACTIVE
+        </span>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-4 shrink-0">
+        <Link
+          :href="route('resumes.target', resume.id)"
+          class="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-750 dark:hover:text-indigo-300 transition-colors flex items-center gap-1.5 border border-indigo-500/15 bg-indigo-500/5 px-3.5 py-1.5 rounded-xl shadow-sm"
+        >
+          🎯 مطابقة الوصف الوظيفي (LinkedIn/ATS Matcher)
+        </Link>
         <Link
           :href="route('dashboard')"
-          class="text-[10px] font-bold text-[#6b7280] hover:text-[#1a1a2e] transition-colors flex items-center gap-1"
+          class="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-1.5"
         >
-          ← Dashboard
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to Dashboard
         </Link>
       </div>
     </div>
   </nav>
 
-  <div class="flex w-full overflow-hidden bg-[#f8f7f5] font-sans antialiased text-[#1a1a2e]" style="height: 100dvh; padding-top: 52px;">
+  <!-- ================= DASHBOARD LAYOUT ================= -->
+  <div class="flex w-full overflow-hidden bg-zinc-50/50 dark:bg-zinc-950 font-sans antialiased text-zinc-900 dark:text-zinc-100 animate-fade-in" style="height: 100dvh; padding-top: 56px;">
     
-    <!-- ================= LEFT SIDEBAR (220px) ================= -->
-    <aside class="w-[220px] h-screen bg-white border-r border-[#e5e3df] flex flex-col justify-between shrink-0 z-10 shadow-sm">
-      <div class="p-5 flex flex-col items-center border-b border-[#e5e3df]">
+    <!-- ================= LEFT NAVIGATION SIDEBAR ================= -->
+    <aside class="w-[240px] h-screen bg-white dark:bg-zinc-900/40 border-r border-zinc-200/80 dark:border-zinc-800/80 flex flex-col justify-between shrink-0 z-10 shadow-sm overflow-hidden">
+      <!-- Circular Progress & Score Banner -->
+      <div class="p-5 flex flex-col items-center border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/40 dark:bg-zinc-900/40">
         <!-- Circular Score Ring -->
-        <div class="relative w-24 h-24 mb-3 flex items-center justify-center">
-          <svg width="88" height="88" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="32" fill="none" stroke="#f1efe9" stroke-width="6"/>
-            <circle cx="40" cy="40" r="32" fill="none" 
-                    :stroke="scoreColor" 
-                    stroke-width="6"
-                    stroke-linecap="round"
-                    :stroke-dasharray="`${2 * Math.PI * 32}`"
-                    :stroke-dashoffset="ringDashoffset"
-                    style="transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1.2s ease-in-out;"/>
+        <div class="relative w-28 h-28 mb-3.5 flex items-center justify-center group">
+          <!-- Outer glowing circle -->
+          <div class="absolute inset-0 rounded-full blur-md opacity-25 scale-95 transition-all duration-700"
+               :style="{ backgroundColor: scoreColor }"></div>
+          
+          <svg width="108" height="108" viewBox="0 0 80 80" class="relative">
+            <circle cx="40" cy="40" r="33" fill="none" stroke="#f1f5f9" dark:stroke="#1e293b" stroke-width="5.5"/>
+            <circle cx="40" cy="40" r="33" fill="none" 
+                     :stroke="scoreColor" 
+                     stroke-width="5.5"
+                     stroke-linecap="round"
+                     :stroke-dasharray="`${2 * Math.PI * 33}`"
+                     :stroke-dashoffset="ringDashoffset"
+                     style="transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);"/>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="text-3xl font-extrabold text-[#1a1a2e]" :style="{ color: scoreColor }">
+            <span class="text-3.5xl font-black tracking-tight" :style="{ color: scoreColor }">
               {{ localOverallScore }}
             </span>
-            <span class="text-[9px] font-bold text-[#6b7280] tracking-wider uppercase -mt-0.5">
-              Overall
+            <span class="text-[9px] font-black text-zinc-450 dark:text-zinc-500 tracking-widest uppercase -mt-0.5">
+              ATS SCORE
             </span>
           </div>
         </div>
-        <div class="text-[10px] text-[#6b7280] uppercase tracking-widest font-bold">
-          CV Genius Score
+
+        <div class="text-[9.5px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-black text-center mt-1">
+          Scoring Diagnostics
         </div>
       </div>
 
-      <!-- Scrollable checklist categories -->
-      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-        <!-- TOP FIXES -->
+      <!-- Left categories menu navigation list -->
+      <div class="flex-1 overflow-y-auto px-3.5 py-5 space-y-6">
+        <!-- CRITICAL ISSUES -->
         <div>
-          <h3 class="text-[10px] font-extrabold text-[#9ca3af] tracking-widest uppercase mb-2 px-2">
-            Top Fixes
-          </h3>
+          <div class="flex items-center justify-between mb-2.5 px-2.5">
+            <h3 class="text-[10px] font-black text-zinc-400 dark:text-zinc-500 tracking-widest uppercase">
+              Top Categories
+            </h3>
+            <span class="text-[9px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full shrink-0 border border-rose-500/15">
+              {{ localIssueChecks.length }} Fixes
+            </span>
+          </div>
           <div class="space-y-1">
             <button v-for="check in visibleIssues" :key="check.id" 
                     @click="scrollToCheck(check.id)"
-                    :class="['w-full text-left px-2.5 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-200', activeCheck === check.id ? 'bg-[#f1efe9] text-[#1a1a2e]' : 'text-[#6b7280] hover:bg-[#f8f7f5] hover:text-[#1a1a2e]']">
-              <span class="truncate pr-1">{{ check.name }}</span>
-              <span v-if="check.status === 'issue'" class="bg-[#e53e3e] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 min-w-[16px] text-center">
+                    :class="[
+                      'w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all duration-200 group/nav border border-transparent', 
+                      activeCheck === check.id 
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/15' 
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-white'
+                    ]">
+              <span class="truncate pr-1 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full" :class="check.status === 'locked' ? 'bg-zinc-450' : 'bg-rose-500'"></span>
+                {{ check.name }}
+              </span>
+              <span v-if="check.status === 'issue'" :class="[
+                'text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 min-w-[16px] text-center border',
+                activeCheck === check.id ? 'bg-white/20 text-white border-transparent' : 'bg-rose-500/10 text-rose-600 dark:text-rose-450 border-rose-500/15'
+              ]">
                 {{ check.issue_count }}
               </span>
-              <span v-else-if="check.status === 'locked'" class="text-zinc-400 text-[10px] shrink-0">
+              <span v-else-if="check.status === 'locked'" class="text-zinc-400 text-[9px] shrink-0">
                 🔒
               </span>
             </button>
             <button v-if="issueChecks.length > 5 && !showAllIssues" 
                     @click="showAllIssues = true"
-                    class="w-full text-left px-2.5 py-1.5 text-[10px] font-bold text-[#4f46e5] hover:underline">
-              {{ (issueChecks.length + lockedChecks.length) - 5 }} MORE ISSUES +
+                    class="w-full text-left px-3 py-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:underline">
+              + {{ (issueChecks.length + lockedChecks.length) - 5 }} More Categories
             </button>
           </div>
         </div>
 
-        <!-- COMPLETED -->
+        <!-- COMPLETED / PASSED -->
         <div>
-          <h3 class="text-[10px] font-extrabold text-[#9ca3af] tracking-widest uppercase mb-2 px-2">
-            Completed
+          <h3 class="text-[10px] font-black text-zinc-400 dark:text-zinc-500 tracking-widest uppercase mb-2.5 px-2.5">
+            Passed Checks
           </h3>
           <div class="space-y-1">
             <button v-for="check in visiblePassed" :key="check.id" 
                     @click="scrollToCheck(check.id)"
-                    :class="['w-full text-left px-2.5 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-200', activeCheck === check.id ? 'bg-[#f1efe9] text-[#1a1a2e]' : 'text-[#6b7280] hover:bg-[#f8f7f5] hover:text-[#1a1a2e]']">
-              <span class="truncate pr-1">{{ check.name }}</span>
-              <span class="bg-[#38a169]/10 text-[#38a169] text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shrink-0">
-                10
+                    :class="[
+                      'w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all duration-200 border border-transparent', 
+                      activeCheck === check.id 
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/15' 
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-white'
+                    ]">
+              <span class="truncate pr-1 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                {{ check.name }}
+              </span>
+              <span :class="[
+                'text-[8px] font-black px-1.5 py-0.5 rounded-full shrink-0 border',
+                activeCheck === check.id ? 'bg-white/20 text-white border-transparent' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/15'
+              ]">
+                PASSED
               </span>
             </button>
             <button v-if="passedChecks.length > 3 && !showAllPassed" 
                     @click="showAllPassed = true"
-                    class="w-full text-left px-2.5 py-1.5 text-[10px] font-bold text-[#38a169] hover:underline">
-              {{ passedChecks.length - 3 }} MORE CHECKS +
+                    class="w-full text-left px-3 py-2 text-[10px] font-black text-emerald-600 dark:text-emerald-400 hover:underline">
+              + {{ passedChecks.length - 3 }} More Passed Scans
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Dashboard Back link -->
-      <div class="p-4 border-t border-[#e5e3df]">
-        <Link :href="route('dashboard')" class="w-full py-2.5 px-4 bg-[#f8f7f5] border border-[#e5e3df] text-[#1a1a2e] text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#f1efe9] transition-all">
-          ← Dashboard
+      <!-- Sidebar Footer -->
+      <div class="p-4 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-2">
+        <Link :href="route('resumes.target', resume.id)" class="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all hover:shadow-md shadow-indigo-500/10 active:scale-[0.98]">
+          🎯 Job Matcher
+        </Link>
+        <Link :href="route('dashboard')" class="w-full py-2.5 px-4 bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-950 dark:hover:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+          ← Main Dashboard
         </Link>
       </div>
     </aside>
 
-    <!-- ================= MIDDLE PANEL (flex-1) ================= -->
-    <main class="flex-1 h-screen overflow-y-auto bg-[#f8f7f5] px-8 py-7 flex flex-col space-y-6">
+    <!-- ================= MIDDLE PANEL (Core Premium Dashboard View) ================= -->
+    <main class="flex-1 h-screen overflow-y-auto bg-transparent px-8 py-8 flex flex-col space-y-7 pb-16">
       
-      <!-- Greeting Header -->
-      <div class="flex items-center justify-between">
+      <!-- Sticky/Sleek Title Banner -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-xl font-extrabold text-[#1a1a2e] tracking-tight">
+          <h2 class="text-2.5xl font-black text-zinc-900 dark:text-white tracking-tight">
             {{ greeting }}, {{ userName }}.
           </h2>
-          <p class="text-xs text-[#6b7280] mt-0.5">Welcome to your real-time resume review.</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+            Scanned on {{ analyzedAt || 'Today' }} · High-fidelity real-time score assessment.
+          </p>
           
-          <!-- AI Contributors Ensemble Section -->
-          <div v-if="localAnalysis?.ai_providers_list && localAnalysis.ai_providers_list.length" class="mt-2 flex items-center gap-1.5 flex-wrap">
-            <span class="text-[10px] text-[#6b7280] font-medium">Analyzed using:</span>
-            <div class="flex items-center gap-1 flex-wrap">
-              <span v-for="prov in localAnalysis.ai_providers_list" :key="prov" class="inline-flex items-center gap-1 rounded bg-[#4f46e5]/10 px-2 py-0.5 font-bold text-[9px] text-[#4f46e5] border border-[#4f46e5]/20">
-                <span class="h-1.5 w-1.5 rounded-full bg-[#38a169]"></span>
+          <!-- AI Ensemble Engine Badge list -->
+          <div v-if="localAnalysis?.ai_providers_list && localAnalysis.ai_providers_list.length" class="mt-2.5 flex items-center gap-2 flex-wrap">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">AI Ensemble Engine:</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span v-for="prov in localAnalysis.ai_providers_list" :key="prov" class="inline-flex items-center gap-1 rounded-md bg-indigo-500/5 px-2 py-0.5 font-bold text-[9px] text-indigo-600 dark:text-indigo-400 border border-indigo-500/10">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                 {{ prov }}
               </span>
             </div>
           </div>
         </div>
-        <button class="px-3.5 py-1.5 border border-[#e5e3df] bg-white hover:bg-zinc-50 rounded-lg text-[10px] font-bold tracking-wider text-[#6b7280] uppercase transition-colors">
-          How It Works
-        </button>
+        
+        <!-- Action Badges -->
+        <div class="flex flex-wrap gap-2.5 shrink-0">
+          <Link :href="route('resumes.target', resume.id)" class="text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl border border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 hover:bg-indigo-500/5 transition flex items-center gap-1.5 shadow-sm active:scale-[0.98]">
+            🎯 Scan Against Job Description
+          </Link>
+          <button type="button" @click="showTemplateModal = true" class="text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-500/10 active:scale-[0.98] transition flex items-center gap-1.5">
+            ↓ Download PDF Preview
+          </button>
+          <Link :href="route('upload')" class="text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 transition text-zinc-700 dark:text-zinc-300 shadow-sm active:scale-[0.98]">
+            Re-upload CV
+          </Link>
+        </div>
       </div>
 
-      <div class="flex flex-wrap gap-2 shrink-0">
-        <Link :href="route('resumes.target', resume.id)" class="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-[#4f46e5] text-[#4f46e5] hover:bg-[#4f46e5]/5">Job match</Link>
-        <button type="button" @click="downloadImprovedCv" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#4f46e5] text-white hover:bg-[#3f37c9]">
-          ↓ Download CV
-        </button>
-        <Link :href="route('upload')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-[#e5e3df] hover:bg-white">Re-upload</Link>
+      <!-- ================= HERO SECTION (glowing diagnostics score + stats) ================= -->
+      <div class="bg-gradient-to-br from-indigo-50 via-violet-50/80 to-white border border-indigo-100 rounded-3xl p-6 shadow-md shadow-indigo-100/10 flex flex-col lg:flex-row items-center gap-8 shrink-0">
+        
+        <!-- Circular Rings (Left) -->
+        <div class="flex flex-col items-center shrink-0">
+          <div class="relative w-36 h-36 flex items-center justify-center">
+            <!-- Glow ring background -->
+            <div class="absolute inset-0 rounded-full blur-xl opacity-25 scale-90"
+                 :style="{ backgroundColor: scoreColor }"></div>
+            
+            <svg width="144" height="144" viewBox="0 0 80 80" class="relative">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="#f1f5f9" dark:stroke="#1e293b" stroke-width="5.5"/>
+              <circle cx="40" cy="40" r="32" fill="none" 
+                      :stroke="scoreColor" 
+                      stroke-width="5.5"
+                      stroke-linecap="round"
+                      :stroke-dasharray="`${2 * Math.PI * 32}`"
+                      :stroke-dashoffset="ringDashoffset"
+                      style="transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-4.5xl font-black tracking-tight" :style="{ color: scoreColor }">
+                {{ localOverallScore }}
+              </span>
+              <span class="text-[9px] font-black text-zinc-400 dark:text-zinc-500 tracking-widest uppercase -mt-0.5">
+                RATING
+              </span>
+            </div>
+          </div>
+          <span class="mt-3.5 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider border shadow-sm"
+                :style="{ color: scoreColor, backgroundColor: `${scoreColor}10`, borderColor: `${scoreColor}20` }">
+            {{ localOverallScore >= 80 ? 'Elite Match' : localOverallScore >= 60 ? 'Strong Match' : 'Revisions Recommended' }}
+          </span>
+        </div>
+
+        <!-- Rating Headline & Stats Grid (Right) -->
+        <div class="flex-1 min-w-0 space-y-4">
+          <div>
+            <h3 class="text-lg font-black text-zinc-900 dark:text-white leading-tight">
+              {{ localAnalysis.score_headline || 'Your ATS scoring assessment is ready.' }}
+            </h3>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 leading-relaxed font-semibold">
+              {{ localAnalysis.score_explanation || 'Your profile has been analyzed against the core parameters of modern Applicant Tracking Systems. Apply the highlighted modifications to unlock maximum compatibility.' }}
+            </p>
+          </div>
+
+          <!-- Quick Statistics Dashboard Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div class="bg-white/70 dark:bg-zinc-900/30 p-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shadow-sm">
+              <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider leading-none">Keyword Coverage</span>
+              <span class="text-lg font-black text-zinc-900 dark:text-white mt-2 flex items-baseline gap-1">
+                {{ recommendedKeywords.length ? Math.round((localAnalysis.keyword_matches?.length / recommendedKeywords.length) * 100) || 0 : 0 }}%
+                <span class="text-[8.5px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">coverage</span>
+              </span>
+            </div>
+
+            <div class="bg-white/70 dark:bg-zinc-900/30 p-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shadow-sm">
+              <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider leading-none">Scanned Sections</span>
+              <span class="text-lg font-black text-zinc-900 dark:text-white mt-2 flex items-baseline gap-1">
+                {{ Object.keys(localAnalysis.resume_sections || {}).filter(k => localAnalysis.resume_sections[k]).length }}
+                <span class="text-[8.5px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">detected</span>
+              </span>
+            </div>
+
+            <div class="bg-white/70 dark:bg-zinc-900/30 p-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shadow-sm">
+              <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider leading-none">Brevity Index</span>
+              <span class="text-lg font-black text-zinc-900 dark:text-white mt-2 flex items-baseline gap-1">
+                {{ localScores.brevity || 0 }}/100
+                <span class="text-[8.5px] text-emerald-500 font-black uppercase tracking-wider">ideal</span>
+              </span>
+            </div>
+
+            <div class="bg-white/70 dark:bg-zinc-900/30 p-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shadow-sm">
+              <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider leading-none">Active Issues</span>
+              <span class="text-lg font-black text-zinc-900 dark:text-white mt-2 flex items-baseline gap-1">
+                {{ localIssueChecks.length }}
+                <span class="text-[8.5px] text-rose-500 font-black uppercase tracking-wider">critical</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 shrink-0">
+      <!-- ================= KPI METRIC SUMMARY CARDS ================= -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 shrink-0">
         <KpiCard v-for="kpi in kpiScores" :key="kpi.label" :label="kpi.label" :value="kpi.value" :accent="kpi.color" />
       </div>
 
-      <div v-if="executiveSummary" class="bg-white rounded-2xl border border-[#e5e3df] p-4 shadow-sm shrink-0">
-        <h3 class="text-[10px] font-black uppercase tracking-wider text-[#6b7280] mb-1">Executive summary</h3>
-        <p class="text-xs text-[#1a1a2e] leading-relaxed">{{ executiveSummary }}</p>
+      <!-- Radar and Executive narrative side by side -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 shrink-0">
+        <!-- Executive Narrative -->
+        <div v-if="executiveSummary" class="lg:col-span-8 bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-3.5">
+            <div class="w-6 h-6 rounded bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xs">📝</div>
+            <h3 class="text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Executive Summary</h3>
+          </div>
+          <p class="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed font-semibold">
+            {{ executiveSummary }}
+          </p>
+        </div>
+
+        <!-- Radar Scan -->
+        <div v-if="radarLabels.length" class="lg:col-span-4 bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xs">📊</div>
+            <h3 class="text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Section balance radar</h3>
+          </div>
+          <div class="flex-1 flex items-center justify-center min-h-[180px]">
+            <RadarChart :labels="radarLabels" :values="radarValues" :height="180" />
+          </div>
+        </div>
       </div>
 
-      <div v-if="radarLabels.length" class="bg-white rounded-2xl border border-[#e5e3df] p-4 shadow-sm shrink-0">
-        <h3 class="text-[10px] font-black uppercase tracking-wider text-[#6b7280] mb-2">Section radar</h3>
-        <RadarChart :labels="radarLabels" :values="radarValues" :height="200" />
-      </div>
-
-      <!-- Score Tabs -->
-      <div class="flex border-b border-[#e5e3df] gap-6 text-xs font-bold shrink-0">
-        <button class="pb-2 border-b-2 border-[#4f46e5] text-[#4f46e5]">Latest Score</button>
-        <button class="pb-2 text-zinc-400 cursor-not-allowed" disabled>Previous Score</button>
-      </div>
-
-      <!-- Score Banner Card -->
-      <div class="bg-white rounded-2xl border border-[#e5e3df] p-6 shadow-sm flex flex-col">
-        <h3 class="text-base font-extrabold text-[#1a1a2e] mb-1">
-          {{ localAnalysis.score_headline || 'Your resume is being evaluated.' }}
-        </h3>
-        <p class="text-xs text-[#6b7280] leading-relaxed">
-          {{ localAnalysis.score_explanation || 'Please follow our key fixes below to immediately increase your score.' }}
-        </p>
-
-        <!-- Gradient Score Bar -->
-        <div class="relative w-full h-3 rounded-full bg-gradient-to-r from-[#e53e3e] via-[#e07b39] to-[#38a169] mb-5 mt-5">
-          <!-- Marker at localOverallScore% -->
-          <div class="absolute w-5 h-5 rounded-full bg-[#4f46e5] border-2 border-white shadow-md top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center justify-center transition-all duration-1000"
-               :style="{ left: `${localOverallScore}%` }">
-            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+      <!-- ================= KEYWORD GAP ANALYSIS PANEL ================= -->
+      <div v-if="recommendedKeywords.length" class="bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm space-y-5 shrink-0">
+        <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 pb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs border border-emerald-500/25">🔑</div>
+            <div>
+              <h3 class="text-sm font-black text-zinc-900 dark:text-white tracking-tight">Keywords Coverage Analysis</h3>
+              <p class="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold mt-0.5">Scanned and identified from target industry job listings</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 uppercase tracking-wider">
+              {{ localAnalysis.keyword_matches?.length || 0 }} / {{ recommendedKeywords.length }} Matched
+            </span>
           </div>
         </div>
 
-        <!-- Yellow Tip Box -->
-        <div class="bg-[#fef8e6] border border-[#f5e3b5] rounded-xl p-4 flex items-start gap-3 mt-1">
-          <span class="text-base leading-none">💡</span>
-          <p class="text-[11px] text-[#856404] leading-relaxed">
-            <span class="font-bold">Recommendation:</span> 80% of candidates increase their score by 20+ points with 3 minor revisions. Reword passive verbs, add metrics, and tailor your profile for maximum recruiter impact.
-          </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Matched Tags (Left) -->
+          <div class="space-y-2.5">
+            <h4 class="text-[9.5px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">✓ Matched Keywords (Optimized)</h4>
+            <div class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto pr-1">
+              <span v-for="kw in localAnalysis.keyword_matches" :key="kw" 
+                    class="text-[9.5px] px-2.5 py-1.5 rounded-xl bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/15">
+                {{ kw }}
+              </span>
+              <span v-if="!localAnalysis.keyword_matches?.length" class="text-xs text-zinc-400 italic">No matches detected. Add industry keywords below.</span>
+            </div>
+          </div>
+
+          <!-- Missing Tags (Right) -->
+          <div class="space-y-2">
+            <h4 class="text-[10px] font-black text-rose-500 uppercase tracking-wider">✗ Missing Keywords (Core Gap)</h4>
+            <div class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto pr-1">
+              <span v-for="kw in localAnalysis.keyword_gaps" :key="kw" 
+                    class="text-[9.5px] px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-800 text-rose-500 font-bold border border-rose-500/30 hover:bg-rose-500/5 transition">
+                + {{ kw }}
+              </span>
+              <span v-if="!localAnalysis.keyword_gaps?.length" class="text-xs text-emerald-500 italic">Excellent! You have cover all identified keywords.</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Steps Checklist List -->
+      <!-- ================= DETAILED SECTIONS ASSESSMENTS (Cards Stack) ================= -->
       <div class="space-y-4">
-        <h3 class="text-xs font-black text-[#6b7280] uppercase tracking-wider">
-          Steps to increase your score
+        <h3 class="text-xs font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+          Detailed Section-by-Section Diagnostics
         </h3>
         
-        <div class="space-y-3">
+        <div class="space-y-3.5">
           <div v-for="check in allChecks" :key="check.id" :id="`check-${check.id}`"
-               :class="['bg-white rounded-2xl border border-[#e5e3df] p-5 shadow-sm transition-all duration-300', activeCheck === check.id ? 'ring-2 ring-[#4f46e5] border-transparent' : '']">
+               :class="[
+                 'bg-white dark:bg-zinc-900 rounded-2xl border transition-all duration-300 p-5 shadow-sm', 
+                 activeCheck === check.id 
+                   ? 'ring-2 ring-indigo-600 border-transparent shadow-lg shadow-indigo-600/5' 
+                   : 'border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700'
+               ]">
             
             <div class="flex items-start gap-4 justify-between">
               
-              <!-- Check Left Icon Indicator -->
-              <div :class="['w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-extrabold text-sm', 
-                            check.status === 'passed' ? 'bg-[#f0faf4] text-[#38a169]' : 
-                            check.status === 'locked' ? 'bg-zinc-100 text-zinc-400' : 'bg-[#fff5f5] text-[#e53e3e]']">
+              <!-- Indicator Icon -->
+              <div :class="[
+                'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-black text-base transition-all', 
+                check.status === 'passed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 
+                check.status === 'locked' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+              ]">
                 <span v-if="check.status === 'passed'">✓</span>
                 <span v-else-if="check.status === 'locked'">🔒</span>
                 <span v-else>✗</span>
               </div>
 
-              <!-- Check Content Details -->
+              <!-- Main Details -->
               <div class="flex-1 min-w-0">
-                <h4 class="text-sm font-bold text-[#1a1a2e] flex items-center gap-2">
-                  {{ check.title || check.name }}
-                  <span v-if="check.status === 'locked'" class="text-[9px] bg-zinc-100 text-zinc-500 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="text-sm font-extrabold text-zinc-900 dark:text-white">
+                    {{ check.title || check.name }}
+                  </h4>
+                  <span v-if="check.status === 'locked'" class="text-[8px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider leading-none">
                     PRO FEATURE
                   </span>
-                </h4>
-                <p class="text-xs text-[#6b7280] mt-0.5 leading-relaxed">{{ check.description }}</p>
+                </div>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{{ check.description }}</p>
 
-                <div v-if="check.id === 'job_fit'" class="mt-3">
+                <!-- Target Job fit button if job fit check -->
+                <div v-if="check.id === 'job_fit'" class="mt-3.5">
                   <Link :href="route('resumes.target', resume.id)" 
-                        class="inline-flex items-center gap-1.5 bg-[#4f46e5] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-[#4f46e5]/15 hover:bg-[#3f37c9] active:scale-[0.98] transition-all">
-                    🎯 Scan against Job Description
+                        class="inline-flex items-center gap-1.5 bg-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-600/15 hover:bg-indigo-700 active:scale-[0.98] transition-all">
+                    🎯 Match against target Job Description
                   </Link>
                 </div>
 
                 <!-- Accordion details for check issues -->
-                <div v-if="check.issues && check.issues.length > 0" class="mt-3">
+                <div v-if="check.issues && check.issues.length > 0" class="mt-3.5">
                   <button @click="toggleCheck(check.id)" 
-                          class="text-xs text-[#4f46e5] font-bold flex items-center gap-1 hover:underline">
-                    {{ expandedChecks[check.id] ? 'Hide details ▲' : 'Show details ▼' }}
+                          class="text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1 hover:underline">
+                    {{ expandedChecks[check.id] ? 'Hide Findings ▲' : `View ${check.issues.length} Findings ▼` }}
                   </button>
 
-                  <div v-if="expandedChecks[check.id]" class="mt-4 space-y-3">
+                  <div v-if="expandedChecks[check.id]" class="mt-4 space-y-3.5">
                     <div v-for="(issue, index) in check.issues" :key="index"
-                         class="bg-[#f8f7f5] rounded-xl p-4 border border-[#e5e3df]/60 space-y-3">
-                      <!-- Original Line -->
-                      <div v-if="issue.original_line" class="border-l-3 border-[#e53e3e] pl-3 py-1.5 bg-[#fff5f5]/60 pr-3 rounded-r-lg flex items-start justify-between gap-4">
+                         class="bg-zinc-50/50 dark:bg-zinc-950/60 rounded-xl p-4.5 border border-zinc-200/50 dark:border-zinc-800/40 space-y-3">
+                      <!-- Original Weak Line -->
+                      <div v-if="issue.original_line" class="border-l-3 border-rose-500 pl-3.5 py-2 bg-rose-500/5 pr-3 rounded-r-xl flex items-start justify-between gap-4">
                         <div class="flex-1 min-w-0">
-                          <span class="text-[9px] font-black text-[#e53e3e] uppercase tracking-wider block mb-0.5">Original Line</span>
-                          <p class="text-xs text-[#1a1a2e] font-mono leading-relaxed break-words">{{ issue.original_line }}</p>
+                          <span class="text-[8px] font-black text-rose-500 uppercase tracking-widest block mb-0.5">Original Line</span>
+                          <p class="text-xs text-zinc-800 dark:text-zinc-200 font-mono leading-relaxed break-words">{{ issue.original_line }}</p>
                         </div>
                         <MagicRewriteButton 
                           :bullet-text="issue.original_line" 
@@ -264,13 +434,15 @@
                           @open="openRewriteModal"
                         />
                       </div>
-                      <!-- Improved Line -->
-                      <div v-if="issue.improved_line" class="border-l-3 border-[#38a169] pl-3 py-1 bg-[#f0faf4]/60 pr-2 rounded-r-lg">
-                        <span class="text-[9px] font-black text-[#38a169] uppercase tracking-wider block mb-0.5">Suggested Rewrite</span>
-                        <p class="text-xs text-[#1a1a2e] font-mono font-semibold leading-relaxed">{{ issue.improved_line }}</p>
+                      
+                      <!-- Suggested Improved Line -->
+                      <div v-if="issue.improved_line" class="border-l-3 border-emerald-500 pl-3.5 py-2 bg-emerald-500/5 pr-3 rounded-r-xl">
+                        <span class="text-[8px] font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase block mb-0.5">Suggested Rewrite</span>
+                        <p class="text-xs text-zinc-800 dark:text-zinc-200 font-mono font-semibold leading-relaxed">{{ issue.improved_line }}</p>
                       </div>
-                      <!-- Feedback Reason -->
-                      <div class="text-[11px] text-[#6b7280] italic leading-relaxed pl-3">
+
+                      <!-- Tip / Feedback reason -->
+                      <div class="text-[11px] text-zinc-500 dark:text-zinc-400 italic leading-relaxed pl-3.5">
                         💡 {{ issue.reason }}
                       </div>
                     </div>
@@ -278,15 +450,15 @@
                 </div>
               </div>
 
-              <!-- Right badge points value -->
+              <!-- Right Score badge -->
               <div class="shrink-0 text-right">
-                <span v-if="check.status === 'issue'" class="bg-[#fff5f5] text-[#e53e3e] border border-[#ef4444]/20 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
-                  {{ check.points_impact }} pts
+                <span v-if="check.status === 'issue'" class="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-[10px] font-extrabold px-3 py-1 rounded-full">
+                  -{{ check.points_impact }} pts
                 </span>
-                <span v-else-if="check.status === 'passed'" class="bg-[#f0faf4] text-[#38a169] border border-[#38a169]/20 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
-                  +10 pts
+                <span v-else-if="check.status === 'passed'" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-[10px] font-extrabold px-3 py-1 rounded-full">
+                  Passed
                 </span>
-                <span v-else-if="check.status === 'locked'" class="bg-zinc-50 border border-zinc-200 text-zinc-500 text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer hover:bg-zinc-100">
+                <span v-else-if="check.status === 'locked'" class="bg-zinc-100 border border-zinc-200 text-zinc-500 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1 cursor-pointer hover:bg-zinc-200 dark:bg-zinc-800 dark:border-zinc-700">
                   🔒 Unlock
                 </span>
               </div>
@@ -296,49 +468,59 @@
       </div>
     </main>
 
-    <!-- ================= RIGHT PANEL (420px) — full CV + inline errors ================= -->
-    <aside class="w-[420px] h-screen bg-white border-l border-[#e5e3df] flex flex-col shrink-0 z-10 shadow-sm min-h-0">
+    <!-- ================= RIGHT PANEL (420px) — Interactive Resume Editor/Viewer ================= -->
+    <aside class="w-[420px] h-screen bg-white dark:bg-zinc-900 border-l border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shrink-0 z-10 shadow-sm min-h-0">
       
-      <!-- Top Action Buttons -->
-      <div class="p-5 border-b border-[#e5e3df] grid grid-cols-2 gap-3 shrink-0 bg-white">
+      <!-- Top actions -->
+      <div class="p-5 border-b border-zinc-200/80 dark:border-zinc-800/80 grid grid-cols-2 gap-3 shrink-0 bg-white dark:bg-zinc-900">
         <!-- RESUME REWRITER → navigates to Upload page for a new CV -->
         <Link
           :href="route('upload')"
-          class="bg-[#4f46e5] text-white py-2 px-3 rounded-xl text-xs font-bold shadow-md shadow-[#4f46e5]/10 flex items-center justify-center gap-1.5 hover:bg-[#3f37c9] active:scale-[0.97] transition-all"
+          class="bg-indigo-600 text-white py-2.5 px-3 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 flex items-center justify-center gap-1.5 hover:bg-indigo-700 active:scale-[0.97] transition-all"
         >
           ✦ RESUME REWRITER
         </Link>
         <button 
           @click="applyAllMagicWrites"
-          class="border border-[#4f46e5] text-[#4f46e5] py-2 px-3 rounded-xl text-xs font-bold hover:bg-[#4f46e5]/5 active:scale-[0.97] transition-all"
+          class="border border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 py-2.5 px-3 rounded-xl text-xs font-bold hover:bg-indigo-600/5 active:scale-[0.97] transition-all"
         >
           ✎ MAGIC WRITE
         </button>
       </div>
 
-      <!-- CV Preview Read-Only Container -->
-      <div class="px-4 py-2 border-b border-[#e5e3df] bg-white flex gap-2 shrink-0">
+      <!-- CV Preview Read-Only tab switcher -->
+      <div class="px-4 py-2 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 flex gap-2 shrink-0">
         <button type="button" @click="cvView = 'structured'"
-                :class="['flex-1 py-1.5 text-[10px] font-bold rounded-lg', cvView === 'structured' ? 'bg-[#4f46e5] text-white' : 'bg-[#f8f7f5] text-zinc-500']">
-          Formatted CV
+                :class="['flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-colors', cvView === 'structured' ? 'bg-indigo-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400']">
+          Formatted Live Preview
         </button>
         <button type="button" @click="cvView = 'full'"
-                :class="['flex-1 py-1.5 text-[10px] font-bold rounded-lg', cvView === 'full' ? 'bg-[#4f46e5] text-white' : 'bg-[#f8f7f5] text-zinc-500']">
-          Full text
+                :class="['flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-colors', cvView === 'full' ? 'bg-indigo-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400']">
+          Raw Text Scan
         </button>
       </div>
 
-      <p v-if="cvView === 'structured' && weakBulletCount > 0" class="px-4 py-1.5 text-[10px] text-[#e53e3e] font-semibold bg-[#fff5f5] border-b border-[#fecaca] shrink-0">
-        {{ weakBulletCount }} line(s) highlighted — scroll to see your full CV
+      <p v-if="cvView === 'structured' && weakBulletCount > 0" class="px-4 py-2 text-[10px] text-rose-600 dark:text-rose-400 font-semibold bg-rose-500/5 border-b border-rose-500/10 shrink-0">
+        ⚡ {{ weakBulletCount }} line(s) highlighted — scroll to review in real-time
       </p>
 
-      <div class="flex-1 min-h-0 overflow-y-auto bg-[#f8f7f5] p-4 pb-8 flex flex-col items-stretch">
+      <div class="flex-1 min-h-0 overflow-y-auto bg-zinc-50 dark:bg-zinc-950/60 p-4 pb-8 flex flex-col items-stretch">
         
-        <!-- Simulated Paper Sheet -->
-        <div v-if="cvView === 'full'" class="w-full bg-white border border-[#e5e3df] shadow-sm rounded-xl p-4 text-[9px] leading-relaxed font-mono mb-4 space-y-0.5">
+        <!-- Elegant Live Preview Template Dropdown Switcher (Arabic) -->
+        <div v-show="cvView === 'structured'" class="w-full mb-3 shrink-0 flex items-center justify-between gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 rounded-xl p-2.5 shadow-sm">
+          <span class="text-[10px] font-extrabold text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+            🎨 قالب المعاينة المباشرة:
+          </span>
+          <select v-model="downloadTemplate" class="text-[10.5px] py-1 pl-2 pr-7 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-extrabold focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-sm">
+            <option v-for="tpl in atsTemplates" :key="tpl.id" :value="tpl.id">{{ tpl.name }}</option>
+          </select>
+        </div>
+        
+        <!-- Simulated Paper Sheet for full text scan -->
+        <div v-if="cvView === 'full'" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl p-4 text-[9px] leading-relaxed font-mono mb-4 space-y-0.5">
           <template v-if="fullTextLines.length">
             <p v-for="(row, idx) in fullTextLines" :key="idx"
-               :class="row.reason ? 'text-[#e53e3e] bg-[#fff5f5] px-2 py-1 rounded border-l-[3px] border-[#e53e3e] whitespace-pre-wrap' : 'text-[#1a1a2e] whitespace-pre-wrap'">
+               :class="row.reason ? 'text-rose-600 bg-rose-500/5 px-2 py-1 rounded border-l-[3px] border-rose-500 whitespace-pre-wrap' : 'text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap'">
               {{ row.text || ' ' }}
               <span v-if="row.reason" class="block text-[7px] font-bold mt-0.5">← {{ row.reason }}</span>
             </p>
@@ -346,7 +528,9 @@
           <p v-else class="text-zinc-400 text-center py-8">No text extracted from PDF.</p>
         </div>
 
-        <div v-show="cvView === 'structured'" class="w-full bg-white border border-[#e5e3df] shadow-sm rounded-xl p-5 text-[10px] text-[#1a1a2e] flex flex-col space-y-4 relative pb-8">
+        <!-- Live formatted structured preview -->
+        <div v-show="cvView === 'structured'" 
+             :class="['w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl p-6 text-[10px] text-zinc-800 dark:text-zinc-200 flex flex-col space-y-4 relative pb-8 transition-all duration-500 overflow-hidden cv-preview', 'preview-' + downloadTemplate]">
           
           <div v-if="!localAnalysis.resume_sections" class="text-center text-zinc-400 py-20">
             No CV preview data available.
@@ -354,57 +538,57 @@
 
           <template v-else>
             <!-- Header Block -->
-            <div class="text-center pb-2 border-b border-[#f1efe9]">
-              <h2 class="text-sm font-extrabold text-[#1a1a2e] uppercase tracking-tight">
+            <div class="cv-header text-center pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <h2 class="cv-name text-sm font-extrabold text-zinc-900 dark:text-white uppercase tracking-tight">
                 {{ localAnalysis.resume_sections.name || userName }}
               </h2>
-              <h3 class="text-[9px] font-bold text-[#4f46e5] uppercase mt-0.5 tracking-wider">
+              <h3 class="cv-title text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase mt-0.5 tracking-wider">
                 {{ localAnalysis.resume_sections.title || 'Candidate Profile' }}
               </h3>
-              <p class="text-[8px] text-[#6b7280] mt-1 font-medium">
+              <p class="cv-contact text-[8px] text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
                 {{ localAnalysis.resume_sections.contact }}
               </p>
               
               <!-- External links -->
               <div v-if="localAnalysis.resume_sections.links && localAnalysis.resume_sections.links.length > 0" 
-                   class="flex justify-center gap-2 mt-1.5 flex-wrap">
+                   class="cv-links flex justify-center gap-2 mt-1.5 flex-wrap">
                 <a v-for="link in localAnalysis.resume_sections.links" :key="link"
                    :href="link" target="_blank"
-                   class="text-[7.5px] text-[#4f46e5] hover:underline font-mono truncate max-w-[150px]">
+                   class="text-[7.5px] text-indigo-600 dark:text-indigo-400 hover:underline font-mono truncate max-w-[150px]">
                   {{ link }}
                 </a>
               </div>
             </div>
 
             <!-- Profile Summary Section -->
-            <div v-if="localAnalysis.resume_sections.summary_text">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1">
+            <div v-if="localAnalysis.resume_sections.summary_text" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-1">
                 Professional Summary
               </h4>
-              <p class="text-[#6b7280] text-[8.5px] leading-relaxed">
+              <p class="cv-section-text text-zinc-500 dark:text-zinc-400 text-[8.5px] leading-relaxed">
                 {{ localAnalysis.resume_sections.summary_text }}
               </p>
             </div>
 
             <!-- Experience Section -->
-            <div v-if="localAnalysis.resume_sections.experience && localAnalysis.resume_sections.experience.length > 0">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-2 border-b border-[#f1efe9] pb-0.5">
+            <div v-if="localAnalysis.resume_sections.experience && localAnalysis.resume_sections.experience.length > 0" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">
                 Work Experience
               </h4>
               
               <div class="space-y-3.5">
-                <div v-for="(job, jobIdx) in localAnalysis.resume_sections.experience" :key="jobIdx">
-                  <div class="flex justify-between items-center text-[9px] font-extrabold text-[#1a1a2e]">
-                    <span>{{ job.job_title }} at {{ job.company }}</span>
-                    <span class="text-[#6b7280] font-bold text-[8px]">{{ job.dates }}</span>
+                <div v-for="(job, jobIdx) in localAnalysis.resume_sections.experience" :key="jobIdx" class="cv-entry">
+                  <div class="cv-entry-header flex justify-between items-baseline text-[9px] font-extrabold text-zinc-900 dark:text-white">
+                    <span class="cv-school">{{ job.job_title }} at {{ job.company }}</span>
+                    <span class="cv-dates text-zinc-400 font-bold text-[8px]">{{ job.dates }}</span>
                   </div>
                   
-                  <ul class="list-disc pl-3.5 mt-1 space-y-2">
+                  <ul class="cv-bullets list-disc pl-3.5 mt-1 space-y-2">
                     <li v-for="(bullet, bulletIdx) in job.bullets" :key="bulletIdx"
-                        :class="['text-[8.5px] leading-relaxed pl-0.5 list-none relative group/item pr-20', bullet.is_weak ? 'text-[#e53e3e] bg-[#fff5f5] px-2 py-1.5 rounded-lg border-l-[3px] border-[#e53e3e]' : 'text-[#555a64]']">
+                        :class="['cv-bullet-item text-[8.5px] leading-relaxed pl-0.5 list-none relative group/item pr-20 transition-all duration-300', bullet.is_weak ? 'text-rose-600 bg-rose-500/5 px-2 py-1.5 rounded-lg border-l-[3px] border-rose-500' : 'text-zinc-600 dark:text-zinc-400']">
                       <span class="block pr-4">{{ typeof bullet === 'string' ? bullet : bullet.text }}</span>
                       
-                      <!-- Inline Hover Magic Rewrite Button! -->
+                      <!-- Inline Hover Magic Rewrite Button -->
                       <div v-if="bullet.is_weak" class="absolute top-1.5 right-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200 z-10 shrink-0">
                         <MagicRewriteButton 
                           :bullet-text="typeof bullet === 'string' ? bullet : bullet.text" 
@@ -413,10 +597,10 @@
                         />
                       </div>
 
-                      <span v-if="bullet.is_weak" class="mt-1 block text-[7px] font-bold text-[#e53e3e]">
+                      <span v-if="bullet.is_weak" class="mt-1 block text-[7px] font-bold text-rose-500">
                         ← {{ bullet.weak_reason || 'Needs improvement' }}
                       </span>
-                      <span v-if="bullet.is_weak && bullet.improved_line" class="mt-1 block text-[7px] text-[#38a169] font-semibold border-t border-[#fecaca]/50 pt-1">
+                      <span v-if="bullet.is_weak && bullet.improved_line" class="mt-1 block text-[7px] text-emerald-600 dark:text-emerald-400 font-semibold border-t border-rose-100 dark:border-rose-950/40 pt-1">
                         ✓ Suggested: {{ bullet.improved_line }}
                       </span>
                     </li>
@@ -426,92 +610,58 @@
             </div>
 
             <!-- Skills Section -->
-            <div v-if="localAnalysis.resume_sections.skills_text">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1 border-b border-[#f1efe9] pb-0.5">
+            <div v-if="localAnalysis.resume_sections.skills_text" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-1 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">
                 Skills & Technologies
               </h4>
-              <p class="text-[#555a64] text-[8.5px] leading-relaxed">
+              <p class="cv-section-text text-zinc-600 dark:text-zinc-400 text-[8.5px] leading-relaxed">
                 {{ localAnalysis.resume_sections.skills_text }}
               </p>
             </div>
 
             <!-- Education Section -->
-            <div v-if="localAnalysis.resume_sections.education">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1 border-b border-[#f1efe9] pb-0.5">
+            <div v-if="parsedEducation && parsedEducation.length > 0" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">
                 Education
               </h4>
-              <p class="text-[#555a64] text-[8.5px] leading-relaxed whitespace-pre-wrap">
-                {{ localAnalysis.resume_sections.education }}
-              </p>
+              <div class="space-y-2">
+                <div v-for="(edu, eduIdx) in parsedEducation" :key="eduIdx" class="cv-entry">
+                  <div class="cv-entry-header flex justify-between items-baseline text-[9px] font-extrabold text-zinc-900 dark:text-white">
+                    <span class="cv-school">{{ edu.school || edu.degree }}</span>
+                    <span class="cv-dates text-zinc-400 font-bold text-[8px]">{{ edu.dates }}</span>
+                  </div>
+                  <div v-if="edu.school" class="cv-degree text-zinc-500 dark:text-zinc-400 text-[8px] font-medium italic mt-0.5">
+                    {{ edu.degree }}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div v-if="localAnalysis.resume_sections.projects_text">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1 border-b border-[#f1efe9] pb-0.5">Projects</h4>
-              <p class="text-[#555a64] text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.projects_text }}</p>
+            <div v-if="localAnalysis.resume_sections.projects_text" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-1 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">Projects</h4>
+              <p class="cv-section-text text-zinc-600 dark:text-zinc-400 text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.projects_text }}</p>
             </div>
 
-            <div v-if="localAnalysis.resume_sections.languages_text">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1 border-b border-[#f1efe9] pb-0.5">Languages</h4>
-              <p class="text-[#555a64] text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.languages_text }}</p>
+            <div v-if="localAnalysis.resume_sections.languages_text" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-1 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">Languages</h4>
+              <p class="cv-section-text text-zinc-600 dark:text-zinc-400 text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.languages_text }}</p>
             </div>
 
-            <div v-if="localAnalysis.resume_sections.certifications_text">
-              <h4 class="text-[8.5px] font-black uppercase text-[#1a1a2e] tracking-wider mb-1 border-b border-[#f1efe9] pb-0.5">Certifications</h4>
-              <p class="text-[#555a64] text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.certifications_text }}</p>
+            <div v-if="localAnalysis.resume_sections.certifications_text" class="cv-section">
+              <h4 class="cv-section-title text-[8.5px] font-black uppercase text-zinc-900 dark:text-white tracking-wider mb-1 border-b border-zinc-100 dark:border-zinc-800 pb-0.5">Certifications</h4>
+              <p class="cv-section-text text-zinc-600 dark:text-zinc-400 text-[8.5px] leading-relaxed whitespace-pre-wrap">{{ localAnalysis.resume_sections.certifications_text }}</p>
             </div>
           </template>
         </div>
       </div>
 
-      <!-- Locked Score Info / Upgrade call-out -->
-      <div class="p-4 border-t border-[#e5e3df] bg-[#f8f7f5] shrink-0 space-y-3">
-        <label class="text-[9px] font-bold text-[#6b7280] uppercase tracking-wider block">
-          Select ATS-Safe Template (Choose 1 of 5)
-        </label>
-        
-        <!-- Premium Visual Selector Grid -->
-        <div class="grid grid-cols-1 gap-2 max-h-[220px] overflow-y-auto pr-1">
-          <button 
-            v-for="tpl in atsTemplates" 
-            :key="tpl.id"
-            type="button"
-            @click="downloadTemplate = tpl.id"
-            :class="[
-              'w-full text-left p-2.5 rounded-xl border transition-all duration-200 flex items-start justify-between gap-3 group',
-              downloadTemplate === tpl.id 
-                ? 'border-[#4f46e5] bg-[#4f46e5]/5 shadow-sm shadow-[#4f46e5]/5 ring-1 ring-[#4f46e5]/30' 
-                : 'border-[#e5e3df] bg-white hover:bg-[#f1efe9]/30 hover:border-zinc-300'
-            ]"
-          >
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[11px] font-bold text-[#1a1a2e]">{{ tpl.name }}</span>
-                <span class="text-[7.5px] px-1 py-0.2 rounded bg-[#f8f7f5] text-[#6b7280] border border-[#e5e3df] font-mono leading-none">
-                  {{ tpl.font }}
-                </span>
-              </div>
-              <p class="text-[8.5px] text-[#6b7280] mt-1 leading-relaxed group-hover:text-zinc-700">
-                {{ tpl.desc }}
-              </p>
-            </div>
-            
-            <!-- Checkmark Indicator -->
-            <div :class="[
-              'w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all',
-              downloadTemplate === tpl.id
-                ? 'bg-[#4f46e5] border-[#4f46e5] text-white scale-110 shadow-sm shadow-[#4f46e5]/20'
-                : 'border-[#e5e3df] bg-[#f8f7f5]'
-            ]">
-              <span v-if="downloadTemplate === tpl.id" class="text-[8px] font-bold">✓</span>
-            </div>
-          </button>
-        </div>
-
+      <!-- PDF Template choices and download triggers (Cleaned up as requested) -->
+      <div class="p-4 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900 shrink-0 space-y-3">
         <button
           type="button"
           :disabled="downloadingCv"
-          @click="downloadImprovedCv"
-          class="w-full py-3 bg-[#4f46e5] text-white text-xs font-bold rounded-xl shadow-md shadow-[#4f46e5]/20 hover:bg-[#3f37c9] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          @click="showTemplateModal = true"
+          class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
         >
           <svg v-if="!downloadingCv" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4M4 21h16" />
@@ -520,10 +670,10 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
-          {{ downloadingCv ? 'Preparing PDF…' : 'Download improved CV (PDF)' }}
+          {{ downloadingCv ? 'جاري تجهيز الـ PDF...' : 'تنزيل الـ CV المُحسن (PDF)' }}
         </button>
-        <p class="text-[8.5px] text-center text-[#6b7280] leading-relaxed">
-          ✓ Single column · ATS-optimized format · includes applied Magic Write improvements
+        <p class="text-[8.5px] text-center text-zinc-400 dark:text-zinc-500 leading-relaxed font-semibold">
+          ✓ عمود واحد متوافق مع نظام الـ ATS · يتضمن تحسينات الذكاء الاصطناعي التلقائية
         </p>
       </div>
     </aside>
@@ -548,7 +698,7 @@
     >
       <div 
         v-if="toastVisible" 
-        class="fixed top-5 right-5 z-[200] max-w-sm w-full bg-zinc-950/90 border border-violet-500/30 rounded-2xl p-4 shadow-xl shadow-violet-500/5 backdrop-blur-md flex items-center gap-3.5"
+        class="fixed top-5 right-5 z-[200] max-w-sm w-full bg-zinc-950/90 dark:bg-zinc-900/90 border border-indigo-500/30 rounded-2xl p-4 shadow-xl shadow-indigo-500/5 backdrop-blur-md flex items-center gap-3.5"
       >
         <div class="w-8 h-8 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -564,6 +714,98 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+      </div>
+    </Transition>
+  </Teleport>
+
+  <!-- PDF Template Selection Modal (Arabic) -->
+  <Teleport to="body">
+    <Transition
+      enter-active-class="transition duration-300 ease-out transform"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-200 ease-in transform"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div v-if="showTemplateModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-md" @click="showTemplateModal = false"></div>
+        
+        <!-- Modal Content Wrapper -->
+        <div class="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Modal Header -->
+          <div class="p-6 border-b border-zinc-150 dark:border-zinc-850 flex items-center justify-between shrink-0 bg-gradient-to-r from-zinc-50 to-white dark:from-zinc-950 dark:to-zinc-900">
+            <div class="space-y-1 text-left">
+              <h3 class="text-lg font-black text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
+                📄 اختر القالب المتوافق مع أنظمة الـ ATS لتنزيل الـ CV
+              </h3>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                جميع هذه القوالب معتمدة ومصممة بعمود واحد لتجاوز أنظمة الفحص والفرز الآلي بنجاح.
+              </p>
+            </div>
+            <button @click="showTemplateModal = false" class="p-2 rounded-full hover:bg-zinc-150 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Modal Grid Content (Scrollable) -->
+          <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div 
+              v-for="tpl in atsTemplates" 
+              :key="tpl.id"
+              @click="triggerTemplateDownload(tpl.id)"
+              class="relative p-5 rounded-2xl border bg-zinc-50/50 hover:bg-white dark:bg-zinc-950/40 dark:hover:bg-zinc-950/80 border-zinc-200 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-400 transition-all duration-300 group cursor-pointer hover:shadow-lg flex flex-col justify-between gap-4"
+            >
+              <div class="space-y-2">
+                <!-- Top Row -->
+                <div class="flex items-start justify-between gap-3">
+                  <div class="space-y-1">
+                    <span class="text-sm font-black text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {{ tpl.name }}
+                    </span>
+                    <span class="block text-[8.5px] uppercase tracking-wider font-extrabold text-zinc-400 dark:text-zinc-500">
+                      خط القالب: {{ tpl.font }}
+                    </span>
+                  </div>
+                  <!-- Radio mark or indicator -->
+                  <div class="w-5 h-5 rounded-full border border-zinc-300 dark:border-zinc-700 flex items-center justify-center group-hover:border-indigo-500 dark:group-hover:border-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/40 transition">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400 opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200"></span>
+                  </div>
+                </div>
+                <!-- Description -->
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                  {{ tpl.desc }}
+                </p>
+              </div>
+
+              <!-- Action button in card -->
+              <div class="pt-3 flex items-center justify-between border-t border-zinc-150 dark:border-zinc-800/50 mt-1">
+                <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  ATS Safe
+                </span>
+                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  تنزيل الآن &larr;
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-5 border-t border-zinc-150 dark:border-zinc-850 flex items-center justify-between shrink-0 bg-zinc-50/50 dark:bg-zinc-950/40">
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 leading-none">
+              ✓ تم الفحص وتنسيق الخطوط والمسافات تلقائياً لموافقة قارئ السيرة الذاتية (ATS parser).
+            </p>
+            <button @click="showTemplateModal = false" class="px-5 py-2.5 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold rounded-xl transition">
+              إلغاء
+            </button>
+          </div>
+          
+        </div>
       </div>
     </Transition>
   </Teleport>
@@ -614,37 +856,130 @@ const toastVisible = ref(false)
 const downloadingCv = ref(false)
 const downloadTemplate = ref('ats_classic')
 const fixesAppliedCount = ref(0)
+const showTemplateModal = ref(false)
+
+const triggerTemplateDownload = (tplId) => {
+    downloadTemplate.value = tplId
+    downloadImprovedCv()
+    showTemplateModal.value = false
+}
+
+const parsedEducation = computed(() => {
+  const rawEducation = localAnalysis.value?.resume_sections?.education
+  if (!rawEducation) return []
+  if (Array.isArray(rawEducation)) return rawEducation
+
+  const lines = String(rawEducation).split(/\r?\n/)
+  const entries = []
+
+  for (let line of lines) {
+    line = line.replace(/<\/?[^>]+(>|$)/g, "").trim()
+    line = line.replace(/\s+/g, ' ').trim()
+    if (!line) continue
+
+    let parts = line.split(/\s*,\s*|\s*-\s*|\s*\|\s*/)
+    let degree = line
+    let school = ''
+    let dates = ''
+
+    if (parts.length >= 3) {
+      let dateIdx = -1
+      for (let i = 0; i < parts.length; i++) {
+        if (/\b(19|20)\d{2}\b|present|current|حتى|الآن/i.test(parts[i])) {
+          dateIdx = i
+          break
+        }
+      }
+
+      if (dateIdx !== -1) {
+        dates = parts[dateIdx]
+        parts.splice(dateIdx, 1)
+      }
+
+      if (parts.length >= 2) {
+        let schoolIdx = -1
+        for (let i = 0; i < parts.length; i++) {
+          if (/university|college|institute|school|academy|جامعة|معهد|كلية/i.test(parts[i])) {
+            schoolIdx = i
+            break
+          }
+        }
+
+        if (schoolIdx !== -1) {
+          school = parts[schoolIdx]
+          parts.splice(schoolIdx, 1)
+          degree = parts.join(', ')
+        } else {
+          degree = parts[0]
+          school = parts[1]
+        }
+      } else if (parts.length === 1) {
+        degree = parts[0]
+      }
+    } else if (parts.length === 2) {
+      if (/\b(19|20)\d{2}\b|present|current/i.test(parts[1])) {
+        degree = parts[0]
+        dates = parts[1]
+      } else if (/\b(19|20)\d{2}\b|present|current/i.test(parts[0])) {
+        degree = parts[1]
+        dates = parts[0]
+      } else {
+        if (/university|college|institute|school|academy|جامعة|معهد|كلية/i.test(parts[0])) {
+          school = parts[0]
+          degree = parts[1]
+        } else {
+          degree = parts[0]
+          school = parts[1]
+        }
+      }
+    }
+
+    entries.push({
+      degree: degree.trim(),
+      school: school.trim(),
+      dates: dates.trim()
+    })
+  }
+
+  return entries
+})
 
 const atsTemplates = [
   {
     id: 'ats_classic',
-    name: 'Harvard Classic',
+    name: 'Harvard Classic (هارفارد الكلاسيكي)',
     font: 'Times New Roman',
-    desc: 'Traditional serif layout. Perfect for finance, consulting, legal, and executive roles.'
+    desc: 'تنسيق كلاسيكي تقليدي بخط Serif. مثالي للمجالات المالية، الاستشارات، القانون، والوظائف القيادية.'
   },
   {
     id: 'ats_modern',
-    name: 'Minimalist Tech',
+    name: 'Minimalist Tech (التقني المبسط)',
     font: 'Arial / Sans-Serif',
-    desc: 'Clean left-aligned sans-serif layout. Best for startups, engineering, and product roles.'
+    desc: 'تنسيق نظيف ومرتب بمحاذاة يسارية خط Sans-serif. الأفضل للشركات الناشئة، الهندسة، ووظائف المنتجات.'
   },
   {
     id: 'ats_executive',
-    name: 'Executive Slate',
+    name: 'Executive Slate (التنفيذي الفاخر)',
     font: 'Georgia / Serif',
-    desc: 'Strong bold headers with thin dividers. Tailored for directors, managers, and leaders.'
+    desc: 'ترويسات عريضة وقوية مع فواصل أنيقة. مصمم خصيصاً للمدراء، التنفيذيين، ورؤساء الأقسام.'
   },
   {
     id: 'ats_tech',
-    name: 'Tech Startup',
+    name: 'Tech Startup (المطور الحديث)',
     font: 'Trebuchet MS',
-    desc: 'Crisp left-aligned layout with modern sky-blue dividers. Excellent for developers.'
+    desc: 'تصميم يساري مميز مع فواصل سماوية عصرية. ممتاز للمبرمجين، مصممي واجهات المستخدم، ومحترفي التقنية.'
   },
   {
     id: 'ats_elegant',
-    name: 'Elegant Garamond',
+    name: 'Elegant Garamond (الأنيق الراقي)',
     font: 'Garamond / Georgia',
-    desc: 'Centered refined headings with elegant minimal layout. Great for operations & HR.'
+    desc: 'ترويسات متمركزة ومصقولة بتصميم ناعم وجذاب. رائع لقطاعات العمليات، الموارد البشرية، والوظائف الإدارية.'
+  },
+  {
+    id: 'ats_professional',
+    name: 'Classic Professional (الاحترافي المعتمد)',
+    font: 'Times New Roman / Serif',
+    desc: 'تنسيق مميز بخطوط واضحة جداً وجداول بيانات مرتبة. مصمم خصيصاً ليتجاوز أدق فلاتر أنظمة ATS بنجاح.'
   }
 ]
 
@@ -836,7 +1171,7 @@ const kpiScores = computed(() => {
     const s = localScores.value || {}
     return [
         { label: 'Overall', value: s.overall ?? localOverallScore.value, color: '#4f46e5' },
-        { label: 'ATS', value: s.ats ?? 0, color: '#0ea5e9' },
+        { label: 'ATS Match', value: s.ats ?? 0, color: '#0ea5e9' },
         { label: 'Recruiter', value: s.recruiter ?? 0, color: '#8b5cf6' },
         { label: 'Impact', value: s.impact ?? 0, color: '#e07b39' },
         { label: 'Brevity', value: s.brevity ?? 0, color: '#38a169' },
@@ -884,7 +1219,7 @@ const weakLineMatchers = computed(() => {
             matchers.push({
                 norm: normalizeLine(text),
                 reason: bullet.weak_reason || 'Needs improvement',
-                weak: Boolean(bullet.is_weak),
+                weak: bullet.is_weak ?? false,
             })
         }
     }
@@ -934,9 +1269,10 @@ const showAllPassed = ref(false)
 
 // Colors based on Resume Worded scores ranges
 const scoreColor = computed(() => {
-    if (localOverallScore.value >= 75) return '#38a169'
-    if (localOverallScore.value >= 50) return '#e07b39'
-    return '#e53e3e'
+    if (localOverallScore.value >= 90) return '#10b981' // emerald-500
+    if (localOverallScore.value >= 75) return '#6366f1' // indigo-500
+    if (localOverallScore.value >= 60) return '#f59e0b' // amber-500
+    return '#f43f5e' // rose-500
 })
 
 // Circular indicator math (radius = 32)
@@ -993,5 +1329,407 @@ const allChecks = computed(() => {
 /* Left border width utility in vanilla CSS for Vue single file component compatibility */
 .border-l-3 {
   border-left-width: 3px;
+}
+
+/* Core CV Preview Scoped Styles - High-Fidelity physical paper emulation */
+.cv-preview {
+  font-size: 10.5px;
+  line-height: 1.45;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18) !important;
+  border-radius: 12px !important;
+  padding: 36px !important;
+  min-height: 297mm;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+/* Lock A4 physical page preview to always white with dark text, ignoring application dark mode background overrides */
+:deep(.dark) .cv-preview {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Specific text color overrides to bypass Tailwind dark utilities inside the physical CV preview sheet */
+:deep(.dark) .cv-preview *,
+.cv-preview * {
+  --tw-text-opacity: 1 !important;
+}
+
+:deep(.dark) .cv-preview .cv-name,
+.cv-preview .cv-name {
+  color: #111827 !important;
+}
+
+:deep(.dark) .cv-preview .cv-title,
+.cv-preview .cv-title {
+  color: #4f46e5 !important;
+}
+
+:deep(.dark) .cv-preview .cv-contact,
+.cv-preview .cv-contact {
+  color: #4b5563 !important;
+}
+
+:deep(.dark) .cv-preview .cv-school,
+:deep(.dark) .cv-preview .cv-entry-header,
+.cv-preview .cv-school,
+.cv-preview .cv-entry-header {
+  color: #111827 !important;
+}
+
+:deep(.dark) .cv-preview .cv-dates,
+.cv-preview .cv-dates {
+  color: #6b7280 !important;
+}
+
+:deep(.dark) .cv-preview .cv-bullet-item:not(.text-rose-600),
+.cv-preview .cv-bullet-item:not(.text-rose-600) {
+  color: #374151 !important;
+}
+
+:deep(.dark) .cv-preview .cv-section-title,
+.cv-preview .cv-section-title {
+  border-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+:deep(.dark) .cv-preview .cv-section-text,
+.cv-preview .cv-section-text {
+  color: #4b5563 !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 1: HARVARD CLASSIC (.preview-ats_classic)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_classic {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+.preview-ats_classic .cv-name {
+  font-family: "Times New Roman", Times, Georgia, serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px;
+  color: #111827 !important;
+}
+.preview-ats_classic .cv-title {
+  color: #374151 !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+.preview-ats_classic .cv-contact {
+  color: #4b5563 !important;
+  font-size: 8.5px !important;
+  border-bottom: none !important;
+}
+.preview-ats_classic .cv-section-title {
+  font-size: 9.5px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid #111827 !important;
+  padding-bottom: 2px !important;
+  margin-top: 12px !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 0.5px;
+  color: #111827 !important;
+}
+.preview-ats_classic .cv-entry-header {
+  font-size: 9.5px !important;
+  font-weight: bold !important;
+  color: #111827 !important;
+}
+.preview-ats_classic .cv-school {
+  font-weight: bold !important;
+}
+.preview-ats_classic .cv-degree {
+  font-style: italic !important;
+  color: #374151 !important;
+}
+.preview-ats_classic .cv-dates {
+  color: #111827 !important;
+  font-weight: bold !important;
+}
+.preview-ats_classic .cv-bullet-item:not(.text-rose-600) {
+  color: #374151 !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 2: MINIMALIST TECH (.preview-ats_modern)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_modern {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif !important;
+  background-color: #fafafa !important;
+}
+.preview-ats_modern .cv-header {
+  text-align: left !important;
+}
+.preview-ats_modern .cv-links {
+  justify-content: flex-start !important;
+}
+.preview-ats_modern .cv-name {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.2px;
+  color: #09090b !important;
+}
+.preview-ats_modern .cv-title {
+  color: #4f46e5 !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px;
+}
+.preview-ats_modern .cv-contact {
+  color: #71717a !important;
+}
+.preview-ats_modern .cv-section-title {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid #e4e4e7 !important;
+  padding-bottom: 3px !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  color: #18181b !important;
+}
+.preview-ats_modern .cv-entry-header {
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  color: #18181b !important;
+}
+.preview-ats_modern .cv-dates {
+  color: #71717a !important;
+}
+.preview-ats_modern .cv-degree {
+  color: #52525b !important;
+}
+.preview-ats_modern .cv-bullet-item:not(.text-rose-600) {
+  color: #27272a !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 3: EXECUTIVE SLATE (.preview-ats_executive)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_executive {
+  font-family: "Georgia", Times, serif !important;
+  background-color: #ffffff !important;
+}
+.preview-ats_executive .cv-header {
+  text-align: left !important;
+}
+.preview-ats_executive .cv-links {
+  justify-content: flex-start !important;
+}
+.preview-ats_executive .cv-name {
+  font-family: "Georgia", Times, serif !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  border-bottom: 2px solid #334155 !important;
+  padding-bottom: 4px;
+}
+.preview-ats_executive .cv-title {
+  color: #475569 !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+}
+.preview-ats_executive .cv-contact {
+  color: #475569 !important;
+}
+.preview-ats_executive .cv-section-title {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  color: #0f172a !important;
+  border-bottom: 1px double #94a3b8 !important;
+  padding-bottom: 3px !important;
+  margin-top: 14px !important;
+  margin-bottom: 8px !important;
+}
+.preview-ats_executive .cv-entry-header {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  color: #0f172a !important;
+}
+.preview-ats_executive .cv-dates {
+  color: #475569 !important;
+  font-weight: bold !important;
+}
+.preview-ats_executive .cv-degree {
+  font-style: italic !important;
+  color: #334155 !important;
+}
+.preview-ats_executive .cv-bullet-item:not(.text-rose-600) {
+  color: #334155 !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 4: TECH STARTUP (.preview-ats_tech)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_tech {
+  font-family: "Trebuchet MS", "Lucida Grande", sans-serif !important;
+  background-color: #f8fafc !important;
+}
+.preview-ats_tech .cv-header {
+  text-align: left !important;
+  border-left: 4px solid #0ea5e9;
+  padding-left: 12px !important;
+  border-bottom: none !important;
+}
+.preview-ats_tech .cv-links {
+  justify-content: flex-start !important;
+}
+.preview-ats_tech .cv-name {
+  font-family: "Trebuchet MS", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  color: #0f172a !important;
+}
+.preview-ats_tech .cv-title {
+  color: #0284c7 !important;
+  font-size: 9.5px !important;
+  font-weight: bold !important;
+}
+.preview-ats_tech .cv-contact {
+  color: #64748b !important;
+}
+.preview-ats_tech .cv-section-title {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  color: #0369a1 !important;
+  border-bottom: 2px solid #0ea5e9 !important;
+  padding-bottom: 2px !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+}
+.preview-ats_tech .cv-entry-header {
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+.preview-ats_tech .cv-dates {
+  color: #0284c7 !important;
+  font-weight: bold !important;
+}
+.preview-ats_tech .cv-degree {
+  color: #475569 !important;
+}
+.preview-ats_tech .cv-bullet-item:not(.text-rose-600) {
+  color: #334155 !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 5: ELEGANT GARAMOND (.preview-ats_elegant)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_elegant {
+  font-family: "Garamond", Georgia, serif !important;
+  background-color: #ffffff !important;
+}
+.preview-ats_elegant .cv-name {
+  font-family: "Garamond", Georgia, serif !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px;
+  color: #1c1917 !important;
+}
+.preview-ats_elegant .cv-title {
+  color: #78716c !important;
+  font-size: 9.5px !important;
+  font-style: italic !important;
+  letter-spacing: 0.5px;
+}
+.preview-ats_elegant .cv-contact {
+  color: #78716c !important;
+}
+.preview-ats_elegant .cv-section-title {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  text-transform: capitalize !important;
+  font-style: italic !important;
+  color: #44403c !important;
+  border-bottom: 1px solid #d6d3d1 !important;
+  padding-bottom: 3px !important;
+  margin-top: 14px !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.5px;
+}
+.preview-ats_elegant .cv-entry-header {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  color: #1c1917 !important;
+}
+.preview-ats_elegant .cv-dates {
+  color: #78716c !important;
+  font-style: italic !important;
+}
+.preview-ats_elegant .cv-degree {
+  font-style: italic !important;
+  color: #57534e !important;
+}
+.preview-ats_elegant .cv-bullet-item:not(.text-rose-600) {
+  color: #44403c !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   THEME 6: CLASSIC PROFESSIONAL (.preview-ats_professional)
+   ──────────────────────────────────────────────────────── */
+.preview-ats_professional {
+  font-family: "Times New Roman", Times, serif !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+.preview-ats_professional .cv-name {
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 17px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px;
+  color: #000000 !important;
+}
+.preview-ats_professional .cv-title {
+  color: #000000 !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+}
+.preview-ats_professional .cv-contact {
+  color: #000000 !important;
+  font-size: 8.5px !important;
+}
+.preview-ats_professional .cv-section-title {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  border-bottom: 1.5px solid #000000 !important;
+  padding-bottom: 2px !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 0.5px;
+  color: #000000 !important;
+}
+.preview-ats_professional .cv-entry-header {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+.preview-ats_professional .cv-school {
+  font-weight: bold !important;
+}
+.preview-ats_professional .cv-degree {
+  font-style: italic !important;
+  color: #000000 !important;
+}
+.preview-ats_professional .cv-dates {
+  color: #000000 !important;
+  font-weight: bold !important;
+}
+.preview-ats_professional .cv-bullet-item:not(.text-rose-600) {
+  color: #000000 !important;
 }
 </style>
